@@ -3,10 +3,10 @@ import models
 
 
 _GRID = []
-for i in range(int(os.environ['ROW_COUNT'])):
+for x in range(int(os.environ['WIDTH'])):
     _GRID.append([])
-    for j in range(int(os.environ['COLUMN_COUNT'])):
-        _GRID[i].append(None)
+    for j in range(int(os.environ['HEIGHT'])):
+        _GRID[x].append(None)
 
 
 def get_state():

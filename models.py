@@ -1,20 +1,24 @@
 import os
+import enum
 
 
-class Brand:
-    TOWER = 1
-    LUXOR = 2
-    WORLDWIDE = 3
-    AMERICAN = 4
-    FESTIVAL = 5
-    IMPERIAL = 6
-    CONTINENTAL = 7
+class Brand(enum.Enum):
+    TOWER = enum.auto()
+    LUXOR = enum.auto()
+    WORLDWIDE = enum.auto()
+    AMERICAN = enum.auto()
+    FESTIVAL = enum.auto()
+    IMPERIAL = enum.auto()
+    CONTINENTAL = enum.auto()
 
 
 class Tile:
-    def __init__(self, i, j):
-        self.i = i
-        self.j = j
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return f'({self.x}, {self.y})'
 
 
 class Chain:
@@ -23,7 +27,7 @@ class Chain:
         self.brand = brand
 
     def __repr__(self):
-        return self.brand
+        return f'brand: {self.brand}, tiles: {self.tiles}'
 
     def is_locked(self):
         return (self.brand is not None) and (len(self.tiles) >= int(os.environ['LOCK_MINIMUM']))
@@ -43,4 +47,4 @@ class GameState:
         self.grid = grid
 
     def __repr__(self):
-        return self.grid
+        return str(self.grid)
