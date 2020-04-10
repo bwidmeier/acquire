@@ -1,6 +1,5 @@
 import os
-import models
-
+from lib import models
 
 _GRID = []
 for x in range(int(os.environ['WIDTH'])):

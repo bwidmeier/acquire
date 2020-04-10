@@ -1,6 +1,6 @@
 import os
 
-import models
+from lib import models
 
 
 def place_tile(state, x, y, brand=None): # TODO: who made move and against what state version?

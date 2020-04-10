@@ -2,8 +2,7 @@ import os
 
 import pytest
 
-import models
-import game
+from lib import game, models
 
 
 @pytest.fixture

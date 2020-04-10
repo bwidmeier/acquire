@@ -1,9 +1,4 @@
-import os
-
-import game
-import persistance
-import models
-
+from lib import persistance, game, models
 
 _HEX_COLOR_VALUES_BY_BRAND = {
     None: "#c3c3c3",
