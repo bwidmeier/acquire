@@ -1,15 +1,8 @@
 import os
 
-from flask import Flask
-from flask import request
-from flask import render_template
-
 import game
 import persistance
 import models
-
-
-app = Flask(__name__)
 
 
 _HEX_COLOR_VALUES_BY_BRAND = {
@@ -24,8 +17,7 @@ _HEX_COLOR_VALUES_BY_BRAND = {
 }
 
 
-@app.route('/', methods=['POST'])
-def take_move():
+def take_move(request):
     x_string, y_string = request.form['grid_space'].split(',')
     x = int(x_string)
     y = int(y_string)
@@ -41,20 +33,15 @@ def take_move():
     return _format_state(new_state)
 
 
-@app.route('/', methods=['GET'])
-def get_state():
-    state = persistance.get_state()
-    return _format_state(state)
-
-
 def _format_state(state):
-    width = int(os.environ['WIDTH'])
-    length = int(os.environ['HEIGHT'])
-
-    return render_template(
-        'index.html',
-        grid=state.grid,
-        x_range=range(width),
-        y_range=range(length),
-        brands=[(0, '')] + [(brand.value, brand.name) for brand in models.Brand],
-        hex_color_values_by_brand=_HEX_COLOR_VALUES_BY_BRAND)
+    return "Yo, world!!!"
+    # width = int(os.environ['WIDTH'])
+    # length = int(os.environ['HEIGHT'])
+    #
+    # return render_template(
+    #     'index.html',
+    #     grid=state.grid,
+    #     x_range=range(width),
+    #     y_range=range(length),
+    #     brands=[(0, '')] + [(brand.value, brand.name) for brand in models.Brand],
+    #     hex_color_values_by_brand=_HEX_COLOR_VALUES_BY_BRAND)
