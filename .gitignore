@@ -1,1 +1,4 @@
 .idea/
+.env.yaml
+.gcloudignore
+requirements.txt

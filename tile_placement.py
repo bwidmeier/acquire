@@ -1,23 +1,23 @@
 import os
 
-from lib import models
+import models
 
 
-def place_tile(state, x, y, brand=None): # TODO: who made move and against what state version?
+def place_tile(state, x, y, brand=None):  # TODO: who made move and against what state version?
     if not 0 <= x < int(os.environ['WIDTH']):
-        raise Exception() # TODO: make custom exception type
+        raise Exception()  # TODO: make custom exception type
 
     if not 0 <= y < int(os.environ['HEIGHT']):
-        raise Exception() # TODO: make custom exception type
+        raise Exception()  # TODO: make custom exception type
 
     if state.grid[x][y] is not None:
-        raise Exception() # TODO: make custom exception type
+        raise Exception()  # TODO: make custom exception type
 
     neighbors = _get_neighbors(state, x, y)
     locked_neighbors = [neighbor for neighbor in neighbors if neighbor.is_locked()]
 
     if len(locked_neighbors) > 1:
-        raise Exception() # TODO: make custom exception type
+        raise Exception()  # TODO: make custom exception type
 
     if len(neighbors) == 0:
         if brand:

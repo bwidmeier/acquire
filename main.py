@@ -1,42 +1,49 @@
-from lib import persistance, game, models
+import os
+from random import shuffle
 
-_HEX_COLOR_VALUES_BY_BRAND = {
-    None: "#c3c3c3",
-    models.Brand.TOWER: "#feac13",
-    models.Brand.LUXOR: "#f52d2e",
-    models.Brand.WORLDWIDE: "#7a4e28",
-    models.Brand.AMERICAN: "#092053",
-    models.Brand.FESTIVAL: "#207735",
-    models.Brand.IMPERIAL: "#cf183e",
-    models.Brand.CONTINENTAL: "#138199"
-}
+import persistance
+import models
+import tile_placement
 
 
-def take_move(request):
-    x_string, y_string = request.form['grid_space'].split(',')
-    x = int(x_string)
-    y = int(y_string)
+def place_tile(request):
+    data = request.get_json(silent=True)
+    game_id = data['game_id']
+    x = data['x']
+    y = data['y']
+    raw_brand = data['brand']
 
-    brand_value = int(request.form['brand'])
-    brand = None if brand_value == 0 else models.Brand(brand_value)
+    brand = None if raw_brand is None else models.Brand(raw_brand)
 
-    old_state = persistance.get_state()
-    new_state = game.place_tile(old_state, x, y, brand)
+    old_state = persistance.get_game_state(game_id)
+    new_state = tile_placement.place_tile(old_state, x, y, brand)
+    persistance.update_game_state(game_id, new_state.to_json())
 
-    persistance.set_state(new_state)
-
-    return _format_state(new_state)
+    return 'OK'
 
 
-def _format_state(state):
-    return "Yo, world!!!"
-    # width = int(os.environ['WIDTH'])
-    # length = int(os.environ['HEIGHT'])
-    #
-    # return render_template(
-    #     'index.html',
-    #     grid=state.grid,
-    #     x_range=range(width),
-    #     y_range=range(length),
-    #     brands=[(0, '')] + [(brand.value, brand.name) for brand in models.Brand],
-    #     hex_color_values_by_brand=_HEX_COLOR_VALUES_BY_BRAND)
+def start_game(request):
+    data = request.get_json(silent=True)
+    game_id = data['game_id']
+
+    persistance.update_game(game_id, is_started=True)
+
+    game = persistance.get_game(game_id)
+    players = game['players']
+    shuffle(players)
+
+    empty_grid = _generate_initial_grid()
+
+    # players start with $6k
+    initial_state = models.GameState({
+        'grid': empty_grid,
+        'player_order': players
+    })
+
+    persistance.create_game_state(game_id, initial_state)
+
+
+def _generate_initial_grid():
+    height = int(os.environ['HEIGHT'])
+    width = int(os.environ['WIDTH'])
+    return {x: [None for _ in range(height)] for x in range(width)}
