@@ -8,12 +8,15 @@ import tile_placement
 
 @pytest.fixture
 def start_state():
-    grid = []
-    for x in range(int(os.environ['WIDTH'])):
-        grid.append([])
-        for _ in range(int(os.environ['HEIGHT'])):
-            grid[x].append(None)
-    return models.GameState(grid)
+    initial_grid = tile_placement.generate_initial_grid()
+    return models.GameState({
+        'is_started': False,
+        'title': 'thing',
+        'grid': initial_grid,
+        'player_order': [],
+        'current_player': None,
+        'stock_by_player': {},
+        'money_by_player': {}})
 
 
 def test_simple_placement_no_brand(start_state):

@@ -13,7 +13,7 @@ def place_tile(state, x, y, brand=None):  # TODO: who made move and against what
     if state.grid[x][y] is not None:
         raise Exception()  # TODO: make custom exception type
 
-    neighbors = _get_neighbors(state, x, y)
+    neighbors = get_neighbors(state.grid, x, y)
     locked_neighbors = [neighbor for neighbor in neighbors if neighbor.is_locked()]
 
     if len(locked_neighbors) > 1:
@@ -28,6 +28,16 @@ def place_tile(state, x, y, brand=None):  # TODO: who made move and against what
         return _grow_chain(state, neighbors[0], brand, x, y)
 
     return _merge_chains(state, neighbors, brand, x, y)
+
+
+def get_neighbors(grid, x, y):
+    return [tile for tile in _get_neighbors_with_nulls(grid, x, y) if tile]
+
+
+def generate_initial_grid():
+    height = int(os.environ['HEIGHT'])
+    width = int(os.environ['WIDTH'])
+    return {x: [None for _ in range(height)] for x in range(width)}
 
 
 def _create_chain(state, x, y):
@@ -52,7 +62,7 @@ def _merge_chains(state, current_chains, brand, x, y):
     new_chain = models.Chain([tile])
     chains = current_chains + [new_chain]
 
-    branded_chains, unbranded_chains = _partition(chains, lambda c: c.brand)
+    branded_chains = [chain for chain in chains if chain.brand]
 
     if not any(branded_chains):
         return _combine_chains(state, chains, brand)
@@ -95,10 +105,6 @@ def _partition(source, pred):
             negative.append(elem)
 
     return positive, negative
-
-
-def _get_neighbors(state, x, y):
-    return [tile for tile in _get_neighbors_with_nulls(state.grid, x, y) if tile]
 
 
 def _get_neighbors_with_nulls(grid, x, y):

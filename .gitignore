@@ -1,4 +1,6 @@
 .idea/
 .env.yaml
-.gcloudignore
 requirements.txt
+__pycache__/
+.vscode/
+.pytest_cache/

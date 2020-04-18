@@ -8,6 +8,8 @@ pytest = "*"
 ipython = "*"
 pdbpp = "*"
 python-dotenv = "*"
+pylint = "*"
+rope = "*"
 
 [packages]
 google-cloud-firestore = "*"
