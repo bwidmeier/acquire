@@ -18,9 +18,8 @@ const createForm = document.querySelector('#create-form');
 createForm.addEventListener('submit', (e) => {
   e.preventDefault();
   axios.post(
-      'https://us-central1-acquire-538ab.cloudfunctions.net/create_game',
-      { title: createForm.title.value },
-      { headers: { 'Content-Type': 'application/json' }})
+      'http://127.0.0.1:5000/create_game',
+      { title: createForm.title.value })
     .then(() => {
       // close the create modal & reset form
       const modal = document.querySelector('#modal-create');
@@ -39,14 +38,18 @@ signupForm.addEventListener('submit', (e) => {
   // get user info
   const email = signupForm['signup-email'].value;
   const password = signupForm['signup-password'].value;
+  const displayName = signupForm['signup-display-name'].value;
 
   // sign up the user & add firestore data
-  auth.createUserWithEmailAndPassword(email, password).then(() => {
-    // close the signup modal & reset form
-    const modal = document.querySelector('#modal-signup');
-    M.Modal.getInstance(modal).close();
-    signupForm.reset();
-    signupForm.querySelector('.error').innerHTML = ''
+  auth.createUserWithEmailAndPassword(email, password).then(userDoc => {
+    const userId = userDoc.user.uid;
+    db.doc(`users/${userId}`).set({display_name: displayName}).then(() => {
+      // close the signup modal & reset form
+      const modal = document.querySelector('#modal-signup');
+      M.Modal.getInstance(modal).close();
+      signupForm.reset();
+      signupForm.querySelector('.error').innerHTML = ''
+    });
   }).catch(err => {
     signupForm.querySelector('.error').innerHTML = err.message;
   });

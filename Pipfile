@@ -13,6 +13,10 @@ rope = "*"
 
 [packages]
 google-cloud-firestore = "*"
+flask = "*"
+flask-cors = "*"
+firebase-admin = "*"
+toolz = "*"
 
 [requires]
 python_version = "3.7"

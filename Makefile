@@ -21,3 +21,6 @@ deploy-start-game: create-env-vars-file
 
 deploy: deploy-place-tile deploy-start-game deploy-create-game deploy-join-game
 	echo 'Deployed!'
+
+run-server:
+	pipenv run flask run
