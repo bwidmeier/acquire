@@ -13,7 +13,8 @@
 .git
 .gitignore
 
-ui/
+ui/.firebaserc
+ui/firebase.json
 test_*.py
 Makefile
 .env
