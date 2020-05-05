@@ -145,7 +145,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
           // return;
           auth.currentUser.getIdToken().then(idToken => {
             axios.post(
-              'http://127.0.0.1:5000/place_tile',
+              '/place_tile',
               { 
                 id_token: idToken,
                 game_id: gameState.id,
@@ -159,7 +159,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
         const brand = document.querySelector('#brand-selector').value;
         auth.currentUser.getIdToken().then(idToken => {
           axios.post(
-            'http://127.0.0.1:5000/place_tile',
+            '/place_tile',
             { 
               id_token: idToken,
               game_id: gameState.id,
@@ -181,7 +181,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
         
         auth.currentUser.getIdToken().then(idToken => {
           axios.post(
-            'http://127.0.0.1:5000/buy_stock',
+            '/buy_stock',
             {
               id_token: idToken,
               game_id: gameState.id,
@@ -203,7 +203,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
 
         auth.currentUser.getIdToken().then(idToken => {
           axios.post(
-            'http://127.0.0.1:5000/resolve_acquisition',
+            '/resolve_acquisition',
             {
               id_token: idToken,
               game_id: gameState.id,
@@ -219,13 +219,13 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
   if (!gameState.is_started) {
     document.querySelector('#start-game').addEventListener('click', e => {
       axios.post(
-        'http://127.0.0.1:5000/start_game',
+        '/start_game',
         { game_id: gameState.id });
     });
 
     document.querySelector('#join-game').addEventListener('click', e => {
       axios.post(
-        'http://127.0.0.1:5000/join_game',
+        '/join_game',
         { 
           game_id: gameState.id, 
           user_id: user.uid 
@@ -257,13 +257,13 @@ const brandNameByBrandLetter = {
 }
 
 const logoByBrand = {
-  'F': "icons/festival.png",
-  'W': "icons/worldwide.png",
-  'A': "icons/american.png",
-  'L': "icons/luxor.png",
-  'I': "icons/imperial.png",
-  'T': "icons/tower.png",
-  'C': "icons/continental.png"
+  'F': "img/festival.png",
+  'W': "img/worldwide.png",
+  'A': "img/american.png",
+  'L': "img/luxor.png",
+  'I': "img/imperial.png",
+  'T': "img/tower.png",
+  'C': "img/continental.png"
 }
 
 // setup grid
@@ -276,13 +276,13 @@ const setupGrid = (gameState, user, playerTiles) => {
       <div class="input-field col s12 m6">
         <select id="brand-selector" class="icons">
           <option value="" selected></option>
-          <option value="F" data-icon="icons/festival.png">Festival</option>
-          <option value="W" data-icon="icons/worldwide.png">Worldwide</option>
-          <option value="A" data-icon="icons/american.png">American</option>
-          <option value="L" data-icon="icons/luxor.png">Luxor</option>
-          <option value="I" data-icon="icons/imperial.png">Imperial</option>
-          <option value="T" data-icon="icons/tower.png">Tower</option>
-          <option value="C" data-icon="icons/continental.png">Continental</option>
+          <option value="F" data-icon="img/festival.png">Festival</option>
+          <option value="W" data-icon="img/worldwide.png">Worldwide</option>
+          <option value="A" data-icon="img/american.png">American</option>
+          <option value="L" data-icon="img/luxor.png">Luxor</option>
+          <option value="I" data-icon="img/imperial.png">Imperial</option>
+          <option value="T" data-icon="img/tower.png">Tower</option>
+          <option value="C" data-icon="img/continental.png">Continental</option>
         </select>
         <label>Brand</label>
       </div>
@@ -293,49 +293,49 @@ const setupGrid = (gameState, user, playerTiles) => {
       html += `
       <table><tr>
         <!-- Festival -->
-        <td><img src='icons/festival.png'></img></td>
+        <td><img src='img/festival.png'></img></td>
         <td><div class="input-field inline">
             <input type="number" id="festivalCount" min="0" max="3" class="validate">
             <label for="festivalCount">Festival</label>
         </div></td>
 
         <!-- Worldwide -->
-        <td><img src='icons/worldwide.png'></img></td>
+        <td><img src='img/worldwide.png'></img></td>
         <td><div class="input-field inline">
             <input type="number" id="worldwideCount" min="0" max="3" class="validate">
             <label for="worldwideCount">Worldwide</label>
         </div></td>
 
         <!-- American -->
-        <td><img src='icons/american.png'></img></td>
+        <td><img src='img/american.png'></img></td>
         <td><div class="input-field inline">
             <input type="number" id="americanCount" min="0" max="3" class="validate">
             <label for="americanCount">American</label>
         </div></td>
 
         <!-- Luxor -->
-        <td><img src='icons/luxor.png'></img></td>
+        <td><img src='img/luxor.png'></img></td>
         <td><div class="input-field inline">
             <input type="number" id="luxorCount" min="0" max="3" class="validate">
             <label for="luxorCount">Luxor</label>
         </div></td>
 
         <!-- Imperial -->
-        <td><img src='icons/imperial.png'></img></td>
+        <td><img src='img/imperial.png'></img></td>
         <td><div class="input-field inline">
             <input type="number" id="imperialCount" min="0" max="3" class="validate">
             <label for="imperialCount">Imperial</label>
         </div></td>
 
         <!-- Tower -->
-        <td><img src='icons/tower.png'></img></td>
+        <td><img src='img/tower.png'></img></td>
         <td><div class="input-field inline">
             <input type="number" id="towerCount" min="0" max="3" class="validate">
             <label for="towerCount">Tower</label>
         </div></td>
 
         <!-- Continental -->
-        <td><img src='icons/continental.png'></img></td>
+        <td><img src='img/continental.png'></img></td>
         <td><div class="input-field inline">
             <input type="number" id="continentalCount" min="0" max="3" class="validate">
             <label for="continentalCount">Continental</label>

@@ -1,12 +1,11 @@
 import os
+import traceback
 from random import shuffle
 
+from flask import Flask, request
+from flask_cors import CORS
 import firebase_admin
 import firebase_admin.auth
-
-from flask import Flask
-from flask import request
-from flask_cors import CORS
 
 import persistance
 import models
@@ -17,9 +16,23 @@ import stock
 
 
 firebase_admin.initialize_app()
+app = Flask(__name__, static_folder='ui')
+CORS(app, max_age=3600, supports_credentials=True)  
 
-app = Flask(__name__)
-CORS(app, max_age=3600, supports_credentials=True)
+
+@app.route('/')
+def root():
+    return app.send_static_file('index.html')
+
+
+@app.route('/scripts/<path:path>')
+def send_script(path):
+    return app.send_static_file(f'scripts/{path}')
+
+
+@app.route('/img/<path:path>')
+def send_img(path):
+    return app.send_static_file(f'img/{path}')
 
 
 @app.route('/place_tile', methods=['POST'])

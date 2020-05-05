@@ -1,6 +1,4 @@
 .idea/
-.env.yaml
-requirements.txt
 __pycache__/
 .vscode/
 .pytest_cache/

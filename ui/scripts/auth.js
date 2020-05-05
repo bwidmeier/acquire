@@ -18,7 +18,7 @@ const createForm = document.querySelector('#create-form');
 createForm.addEventListener('submit', (e) => {
   e.preventDefault();
   axios.post(
-      'http://127.0.0.1:5000/create_game',
+      '/create_game',
       { title: createForm.title.value })
     .then(() => {
       // close the create modal & reset form

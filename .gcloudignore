@@ -13,13 +13,11 @@
 .git
 .gitignore
 
-node_modules
-#!include:.gitignore
-#
-
 ui/
-templates/
 test_*.py
-Pipfile
 Makefile
 .env
+
+.pytest_cache
+.vscode
+__pycache__
