@@ -189,3 +189,7 @@ class PlaceTileResult():
         self.acquired_chains = acquired_chains
         self.acquirer = acquirer
         self.new_brand = new_brand
+
+
+class RuleViolation(Exception):
+    pass

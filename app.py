@@ -2,7 +2,7 @@ import os
 import traceback
 from random import shuffle
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import firebase_admin
 import firebase_admin.auth
@@ -45,10 +45,10 @@ def place_tile():
     state = persistance.get_game_state(game_id)
     
     if state.current_action_player != player_id:
-        raise Exception("Stop trying to take other player's turns! You cheat!")
+        raise models.RuleViolation("Stop trying to take other player's turns! You cheat!")
 
     if state.current_action_type != models.ActionType.PLACE_TILE:
-        raise Exception('It is your turn, but it is not time to place a tile!')
+        raise models.RuleViolation('It is your turn, but it is not time to place a tile!')
 
     if should_skip:
         turns.transition_from_place(state, None, [])
@@ -64,10 +64,10 @@ def place_tile():
     player_tiles = persistance.get_player_tiles(game_id, player_id)
 
     if not any(tile.x == x and tile.y == y for tile in player_tiles):
-        raise Exception('You do not have that tile! Stop trying to cheat!')
+        raise models.RuleViolation('You do not have that tile! Stop trying to cheat!')
 
     if not state.is_started:
-        raise Exception('Cannot take turn until game has begun!')
+        raise models.RuleViolation('Cannot take turn until game has begun!')
 
     place_tile_result = grid.place_tile(state, x, y, brand)
     stock.apply_majority_bonuses(state, place_tile_result.acquired_chains)
@@ -98,19 +98,19 @@ def resolve_acquisition():
     state = persistance.get_game_state(game_id)
 
     if state.current_action_player != user_id:
-        raise Exception("Stop trying to take other player's turns! You cheat!")
+        raise models.RuleViolation("Stop trying to take other player's turns! You cheat!")
 
     if state.current_action_type != models.ActionType.RESOLVE_ACQUISITION:
-        raise Exception('It is your turn, but it is not time to resolve an acquisition!')
+        raise models.RuleViolation('It is your turn, but it is not time to resolve an acquisition!')
 
     if not state.is_started:
-        raise Exception('Cannot take turn until game has begun!')
+        raise models.RuleViolation('Cannot take turn until game has begun!')
 
     acquiree = models.Brand(state.current_action_details['acquiree'])
     player_acquiree_stock_count = state.stock_by_player[user_id][acquiree]
 
     if sell_count + trade_count > player_acquiree_stock_count:
-        raise Exception('Cannot trade and sell more stock than you current have!')
+        raise models.RuleViolation('Cannot trade and sell more stock than you current have!')
 
     acquirer = models.Brand(state.current_action_details['acquirer'])
     cost_at_acquisition_time = state.current_action_details['acquiree_cost_at_acquisition_time']
@@ -136,13 +136,13 @@ def buy_stock():
     state = persistance.get_game_state(game_id)
 
     if state.current_action_player != user_id:
-        raise Exception("Stop trying to take other player's turns! You cheat!")
+        raise models.RuleViolation("Stop trying to take other player's turns! You cheat!")
 
     if state.current_action_type != models.ActionType.BUY_STOCK:
-        raise Exception('It is your turn, but it is not time to buy stock!')
+        raise models.RuleViolation('It is your turn, but it is not time to buy stock!')
 
     if not state.is_started:
-        raise Exception('Cannot take turn until game has begun!')
+        raise models.RuleViolation('Cannot take turn until game has begun!')
 
     total_stock_purchased = 0
 
@@ -152,7 +152,7 @@ def buy_stock():
         stock.buy_stock(state, user_id, models.Brand(raw_brand), parsed_amount)
 
     if total_stock_purchased > max_purchase_amount:
-        raise Exception('Too many stock in purchase order!')
+        raise models.RuleViolation('Too many stock in purchase order!')
 
     turn_transitioned_state = turns.transition_from_buy(state)
 
@@ -181,10 +181,10 @@ def join_game():
     game_state = persistance.get_game_state(game_id)
 
     if user_id in game_state.player_order:
-        raise Exception('Player is already in this game!')
+        raise models.RuleViolation('Player is already in this game!')
 
     if game_state.is_started:
-        raise Exception('Cannot join a game in progress!')
+        raise models.RuleViolation('Cannot join a game in progress!')
 
     user_data = persistance.get_user_data(user_id)
 
@@ -205,7 +205,7 @@ def start_game():
     game_state = persistance.get_game_state(game_id)
     
     if game_state.is_started:
-        raise Exception('Cannot start already started game!')
+        raise models.RuleViolation('Cannot start already started game!')
 
     player_count_min = int(os.environ['PLAYER_COUNT_MIN'])
     player_count_max = int(os.environ['PLAYER_COUNT_MAX'])
@@ -214,7 +214,7 @@ def start_game():
     player_count = len(game_state.player_order)
 
     if not player_count_min <= player_count <= player_count_max:
-        raise Exception(f'Cannot start game with {player_count} players!')
+        raise models.RuleViolation(f'Cannot start game with {player_count} players!')
 
     shuffle(game_state.player_order)
     starting_player = game_state.player_order[0]
@@ -242,6 +242,11 @@ def start_game():
     persistance.update_game_state(game_id, game_state.to_dict())
 
     return 'OK'
+
+
+@app.errorhandler(models.RuleViolation)
+def handle_rule_violation(e):
+    return (jsonify(error=str(e)), 400)
 
 
 if __name__ == '__main__':

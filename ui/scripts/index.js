@@ -151,7 +151,9 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
                 game_id: gameState.id,
                 skip: true
               }
-            );
+            )
+            .then(r => clearError())
+            .catch(e => displayError(e.response.data.error));
           });
         }
         const x = selectedSpace.dataset['x'];
@@ -168,7 +170,9 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
               brand: brand,
               skip: false
             }
-          );
+          )
+          .then(r => clearError())
+          .catch(e => displayError(e.response.data.error));
         });
       } else if (gameState.current_action_type == 'BUY') {
         const festivalCount = document.querySelector('#festivalCount').value;
@@ -195,7 +199,9 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
                 C: continentalCount || 0
               }
             }
-          );
+          )
+          .then(r => clearError())
+          .catch(e => displayError(e.response.data.error));
         });
       } else if (gameState.current_action_type == 'RESOLVE') {
         const sellCount = document.querySelector('#sellCount').value;
@@ -210,7 +216,9 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
               sell_count: sellCount || 0,
               trade_count: tradeCount || 0
             }
-          );
+          )
+          .then(r => clearError())
+          .catch(e => displayError(e.response.data.error));
         });
       }
     });
@@ -220,7 +228,10 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
     document.querySelector('#start-game').addEventListener('click', e => {
       axios.post(
         '/start_game',
-        { game_id: gameState.id });
+        { game_id: gameState.id }
+      )
+      .then(r => clearError())
+      .catch(e => displayError(e.response.data.error));
     });
 
     document.querySelector('#join-game').addEventListener('click', e => {
@@ -229,10 +240,31 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
         { 
           game_id: gameState.id, 
           user_id: user.uid 
-        });
+        }
+      )
+      .then(r => clearError())
+      .catch(e => displayError(e.response.data.error));
     });
   }
 }
+
+const displayError = (error) => {
+  const errorDiv = document.querySelector('#errorDiv');
+    errorDiv.innerHTML = `<div class="row">
+    <div class="col s12">
+      <div class="card-panel red">
+        <span class="white-text">
+          ${error}
+        </span>
+      </div>
+    </div>
+  </div>`
+};
+
+const clearError = () => {
+  const errorDiv = document.querySelector('#errorDiv');
+  errorDiv.innerHTML = '';
+};
 
 // map brand to color
 const colorByBrand = {

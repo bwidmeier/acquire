@@ -7,7 +7,7 @@ import models
 
 def buy_stock(state, player_id, brand, amount):
     if amount < 0:
-        raise Exception('Cannot buy negative stock!')
+        raise models.RuleViolation('Cannot buy negative stock!')
 
     if amount == 0:
         return state
@@ -16,13 +16,13 @@ def buy_stock(state, player_id, brand, amount):
     player_cash_amount = state.money_by_player[player_id]
 
     if amount > available_stock_count:
-        raise Exception('Insufficient stock available to fulfill this order!')
+        raise models.RuleViolation('Insufficient stock available to fulfill this order!')
 
     price_per_stock = _calculate_price_from_state_and_brand(state, brand)
     total_price = price_per_stock * amount
 
     if total_price > player_cash_amount:
-        raise Exception('You cannot afford this order!')
+        raise models.RuleViolation('You cannot afford this order!')
 
     state.stock_availability[brand] -= amount
     _perform_money_change(state, player_id, -total_price)
@@ -33,12 +33,12 @@ def buy_stock(state, player_id, brand, amount):
 
 def sell_stock(state, player_id, brand, cost_per_stock, sell_count):
     if sell_count < 0:
-        raise Exception('Cannot sell negative stock!')
+        raise models.RuleViolation('Cannot sell negative stock!')
 
     player_stock_count = state.stock_by_player[player_id][brand]
 
     if player_stock_count < sell_count:
-        raise Exception('Cannot sell more stock than you have!')
+        raise models.RuleViolation('Cannot sell more stock than you have!')
 
     total_price = cost_per_stock * sell_count
 
@@ -51,16 +51,16 @@ def sell_stock(state, player_id, brand, cost_per_stock, sell_count):
 
 def trade_stock(state, player_id, brand_to_send, brand_to_receive, send_count):
     if send_count < 0:
-        raise Exception('Cannot trade negative stock!')
+        raise models.RuleViolation('Cannot trade negative stock!')
 
     if send_count % 2 != 0:
-        raise Exception('Cannot trade an odd number of stock!')
+        raise models.RuleViolation('Cannot trade an odd number of stock!')
     
     global_stock_to_receive_count = state.stock_availability[brand_to_receive]
     receive_count = send_count / 2
 
     if receive_count > global_stock_to_receive_count:
-        raise Exception('Insufficient stock available to complete trade!')
+        raise models.RuleViolation('Insufficient stock available to complete trade!')
 
     state.stock_by_player[player_id][brand_to_send] -= send_count
     state.stock_by_player[player_id][brand_to_receive] += receive_count
@@ -186,7 +186,7 @@ def _calculate_price_from_state_and_brand(state, brand):
     chain = grid.find_chain(state.grid, brand)
 
     if not chain:
-        raise Exception('No chains of this brand found!')
+        raise models.RuleViolation('No chains of this brand found!')
 
     return calculate_price_from_chain(chain)
 

@@ -19,14 +19,14 @@ def test_simple_placement_no_brand(state):
 
 
 def test_simple_placement_brand(state):
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 1, 3, brand=models.Brand.LUXOR)
 
 
 def test_already_taken_spot(state):
     grid.place_tile(state, 1, 3)
 
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 1, 3)
 
 
@@ -66,7 +66,7 @@ def test_grow_chain_illegally_specify_same_brand(state):
     grid.place_tile(state, 4, 6)
     grid.place_tile(state, 4, 7, brand=models.Brand.IMPERIAL)
 
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 3, 6, brand=models.Brand.IMPERIAL)
 
 
@@ -74,7 +74,7 @@ def test_grow_chain_illegally_specify_new_brand(state):
     grid.place_tile(state, 4, 6)
     grid.place_tile(state, 4, 7, brand=models.Brand.IMPERIAL)
 
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 3, 6, brand=models.Brand.WORLDWIDE)
 
 
@@ -149,10 +149,10 @@ def test_merge_multiple_branded_same_size(state):
     grid.place_tile(state, 6, 4)
     grid.place_tile(state, 6, 5, brand=models.Brand.AMERICAN)
 
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 7, 5)
 
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 7, 5, brand=models.Brand.LUXOR)
 
     grid.place_tile(state, 7, 5, brand=models.Brand.AMERICAN)
@@ -176,10 +176,10 @@ def test_merge_multiple_branded_different_size(state):
     grid.place_tile(state, 6, 4)
     grid.place_tile(state, 6, 5, brand=models.Brand.AMERICAN)
 
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 7, 5, brand=models.Brand.AMERICAN)
 
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 7, 5, brand=models.Brand.LUXOR)
 
     grid.place_tile(state, 7, 5)
@@ -297,7 +297,7 @@ def test_merge_locked_chains(state):
     assert state.grid[7][0].is_locked()
     assert state.grid[1][2].is_locked()
 
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 2, 1)
 
 
@@ -365,5 +365,5 @@ def test_merge_locked_chains_and_unlocked_chain(state):
     assert state.grid[5][4].is_locked()
     assert not state.grid[10][2].is_locked()
 
-    with pytest.raises(Exception):
+    with pytest.raises(models.RuleViolation):
         grid.place_tile(state, 9, 2)

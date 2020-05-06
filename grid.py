@@ -41,23 +41,23 @@ def find_chain(grid, brand):
 
 def _place_tile_without_brand_registration(state, x, y, brand=None):
     if not 0 <= x < int(os.environ['WIDTH']):
-        raise Exception('x coordinate is off the board!')
+        raise models.RuleViolation('x coordinate is off the board!')
     
     if not 0 <= y < int(os.environ['HEIGHT']):
-        raise Exception('y coordinate is off the board!')
+        raise models.RuleViolation('y coordinate is off the board!')
 
     if state.grid[x][y] is not None:
-        raise Exception('Space already has tile on it!')
+        raise models.RuleViolation('Space already has tile on it!')
 
     neighbors = get_unique_neighbors(state.grid, x, y)
     locked_neighbors = [neighbor for neighbor in neighbors if neighbor.is_locked()]
 
     if len(locked_neighbors) > 1:
-        raise Exception('Cannot place tile adjacent to multiple locked chains!')
+        raise models.RuleViolation('Cannot place tile adjacent to multiple locked chains!')
 
     if len(neighbors) == 0:
         if brand:
-            raise Exception('Cannot specify brand for single tile!')
+            raise models.RuleViolation('Cannot specify brand for single tile!')
 
         _create_chain(state, x, y)
         return models.PlaceTileResult(state, [], None, None)
@@ -80,10 +80,10 @@ def _create_chain(state, x, y):
 
 def _grow_chain(state, chain, brand, x, y):
     if brand in state.active_brands:
-        raise Exception('Cannot use brand already in use!')
+        raise models.RuleViolation('Cannot use brand already in use!')
     
     if brand is not None and chain.brand is not None:
-        raise Exception('Cannot rebrand chain!')
+        raise models.RuleViolation('Cannot rebrand chain!')
 
     if brand:
         chain.brand = brand
@@ -113,15 +113,15 @@ def _merge_chains(state, current_chains, brand, x, y):
 
     if largest_brand_count == 1:
         if brand:
-            raise Exception('Cannot choose a brand when there is uniquely one largest!')
+            raise models.RuleViolation('Cannot choose a brand when there is uniquely one largest!')
 
         return _combine_chains(state, chains, largest_brands[0])
 
     if not brand:
-        raise Exception('Must choose a brand!')
+        raise models.RuleViolation('Must choose a brand!')
 
     if brand not in largest_brands:
-        raise Exception('Must choose one of the largest brands!')
+        raise models.RuleViolation('Must choose one of the largest brands!')
 
     return _combine_chains(state, chains, brand)
 
