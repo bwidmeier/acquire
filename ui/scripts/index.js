@@ -114,7 +114,12 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
   const gameState = gameStateDoc.data();
   gameState.id = gameStateDoc.id;
 
-  var html = '';
+  var html = `<div class="row" style="margin:0;">
+  <div id="errorDiv" class="col s11" style="padding:0;"></div>
+  <div class="col s1" style="padding:0 10.5;">
+    <a id="showHelpCard" class="waves-effect waves-light btn modal-trigger" data-target="modal-help">?</a>
+  </div>
+</div>`;
 
   if (!gameState.is_started) {
     html += '<a id="join-game" class="waves-effect waves-light btn">join game</a><br><br>';
@@ -251,8 +256,8 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
 const displayError = (error) => {
   const errorDiv = document.querySelector('#errorDiv');
     errorDiv.innerHTML = `<div class="row">
-    <div class="col s12">
-      <div class="card-panel red">
+    <div class="col s12" style="0 10.5;">
+      <div class="card-panel red" style="padding:8; margin:0;">
         <span class="white-text">
           ${error}
         </span>

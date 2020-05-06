@@ -249,5 +249,15 @@ def handle_rule_violation(e):
     return (jsonify(error=str(e)), 400)
 
 
+
+@app.after_request
+def add_header(r):
+    if bool(int(os.environ['FORCE_REFRESH'])):
+        r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        r.headers['Pragma'] = 'no-cache'
+        r.headers['Expires'] = '0'
+    return r
+
+
 if __name__ == '__main__':
     app.run()
