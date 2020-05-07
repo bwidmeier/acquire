@@ -75,7 +75,7 @@ def transition_from_buy(game_state):
 
 
 def _is_game_over(state):
-    branded_chains = grid.get_branded_chains(state.grid)
+    branded_chains = grid.get_branded_chains(state)
     win_size = int(os.environ['WIN_SIZE'])
     chain_of_sufficient_size_exists = any(len(chain.tiles) >= win_size for chain in branded_chains)
     all_chains_are_locked = branded_chains and all(chain.is_locked() for chain in branded_chains) 

@@ -15,6 +15,11 @@ class Brand(enum.Enum):
     IMPERIAL = 'I'
     CONTINENTAL = 'C'
 
+    @staticmethod
+    def order_helper(source):
+        ordering = {'T': 0, 'L': 1, 'W': 2, 'A': 3, 'F': 4, 'I': 5, 'C': 6}
+        return ordering[source.value]
+
 
 class ActionType(enum.Enum):
     PLACE_TILE = 'PLACE'
@@ -66,8 +71,9 @@ class GameState:
         self.money_by_player = {}
         self.user_data_by_id = {}
         self.tiles_remaining = 0
-        self.active_brands = []
+        self.cost_by_brand = {}
         self.inactive_brands = [brand for brand in Brand]
+        self.active_brands = []
         self.most_recently_placed_tile = None
         self.acquisition_resolution_queue = []
 
@@ -87,8 +93,9 @@ class GameState:
             'stock_by_player': toolz.valmap(lambda stock_map: toolz.keymap(lambda brand: brand.value, stock_map), self.stock_by_player),
             'user_data_by_id': self.user_data_by_id,
             'tiles_remaining': self.tiles_remaining,
-            'active_brands': [brand.value for brand in self.active_brands],
+            'cost_by_brand': toolz.keymap(lambda b: b.value, self.cost_by_brand),
             'inactive_brands': [brand.value for brand in self.inactive_brands],
+            'active_brands': [brand.value for brand in self.active_brands],
             'most_recently_placed_tile': None if not self.most_recently_placed_tile else self.most_recently_placed_tile.to_dict(),
             'acquisition_resolution_queue': [
                 {
@@ -119,8 +126,9 @@ class GameState:
         new_state.stock_by_player = { player: { Brand(brand_value): amount for brand_value, amount in stock_map.items() } for player, stock_map in state_data['stock_by_player'].items() }
         new_state.user_data_by_id = state_data['user_data_by_id']
         new_state.tiles_remaining = state_data['tiles_remaining']
-        new_state.active_brands = [Brand(brand_value) for brand_value in state_data['active_brands']]
+        new_state.cost_by_brand = toolz.keymap(Brand, state_data['cost_by_brand'])
         new_state.inactive_brands = [Brand(brand_value) for brand_value in state_data['inactive_brands']]
+        new_state.active_brands = [Brand(brand_value) for brand_value in state_data['active_brands']]
         new_state.most_recently_placed_tile = None if not state_data['most_recently_placed_tile'] else Tile(**state_data['most_recently_placed_tile'])
         new_state.acquisition_resolution_queue = [
             {

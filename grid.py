@@ -3,44 +3,7 @@ import os
 import models
 
 
-def place_tile(state, x, y, brand=None):
-    tile = models.Tile(x, y)
-    result = _place_tile_without_brand_registration(state, tile, brand)
-    
-    for chain in result.acquired_chains:
-        _unregister_brand(state, chain.brand)
-
-    if result.new_brand:
-        _register_brand(state, result.new_brand)
-
-    return result
-
-
-def get_unique_neighbors(grid, tile):
-    return list({chain for chain in _get_nonunique_neighbors_with_nulls(grid, tile) if chain})
-
-
-def get_branded_chains(grid):
-    branded_chains = set()
-
-    for column in grid:
-        for chain in column:
-            if chain and chain.brand:
-                branded_chains.add(chain)
-
-    return list(branded_chains)
-
-
-def find_chain(grid, brand):
-    for column in grid:
-        for chain in column:
-            if chain and chain.brand == brand:
-                return chain
-
-    return None
-
-
-def _place_tile_without_brand_registration(state, tile, brand=None): 
+def place_tile(state, tile, brand=None): 
     if not 0 <= tile.x < int(os.environ['WIDTH']):
         raise models.RuleViolation('x coordinate is off the board!')
     
@@ -72,6 +35,40 @@ def _place_tile_without_brand_registration(state, tile, brand=None):
     return models.PlaceTileResult(state, acquired_chains, acquiree, new_brand, tile)
 
 
+def get_unique_neighbors(grid, tile):
+    return list({chain for chain in _get_nonunique_neighbors_with_nulls(grid, tile) if chain})
+
+
+def get_branded_chains(state):
+    branded_chains = set()
+
+    for column in state.grid:
+        for chain in column:
+            if chain and chain.brand:
+                branded_chains.add(chain)
+
+    return list(branded_chains)
+
+
+def find_chain(grid, brand):
+    for column in grid:
+        for chain in column:
+            if chain and chain.brand == brand:
+                return chain
+
+    return None
+
+
+def set_brand_lists(state):
+    branded_chains = get_branded_chains(state)
+    active_brands = [chain.brand for chain in branded_chains]
+    inactive_brands = [brand for brand in models.Brand if brand not in active_brands]
+
+    state.active_brands = sorted(active_brands, key=models.Brand.order_helper)
+    state.inactive_brands = sorted(inactive_brands, key=models.Brand.order_helper)
+    return state
+
+
 def _create_chain(state, tile):
     chain = models.Chain([tile])
     state.grid[tile.x][tile.y] = chain
@@ -79,7 +76,7 @@ def _create_chain(state, tile):
 
 
 def _grow_chain(state, chain, brand, tile):
-    if brand in state.active_brands:
+    if brand in state.cost_by_brand:
         raise models.RuleViolation('Cannot use brand already in use!')
     
     if brand is not None and chain.brand is not None:
@@ -137,22 +134,6 @@ def _combine_chains(state, chains, brand):
     new_brand = brand if not any_branded_chains else None
 
     return (acquired_chains, brand, new_brand)
-
-
-def _unregister_brand(state, brand):
-    if not brand:
-        raise Exception('Cannot unregister null brand!')
-
-    state.active_brands.remove(brand)
-    state.inactive_brands.append(brand)
-
-
-def _register_brand(state, brand):
-    if not brand:
-        raise Exception('Cannot register null brand!')
-
-    state.active_brands.append(brand)
-    state.inactive_brands.remove(brand)
 
 
 def _partition(source, pred):

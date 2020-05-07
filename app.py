@@ -69,9 +69,12 @@ def place_tile():
     if not state.is_started:
         raise models.RuleViolation('Cannot take turn until game has begun!')
 
-    place_tile_result = grid.place_tile(state, x, y, brand)
+    tile = models.Tile(x, y)
+    place_tile_result = grid.place_tile(state, tile, brand)
     stock.apply_majority_bonuses(state, place_tile_result.acquired_chains)
     stock.award_founder_share(state, player_id, brand)
+    grid.set_brand_lists(state)
+    stock.set_price_table(state)
     turns.transition_from_place(state, place_tile_result)
 
     new_tile = tiles.draw_tile(global_tiles)
@@ -227,7 +230,7 @@ def start_game():
 
     board_starting_tiles = tiles.draw_tiles(initial_tiles, player_count)
     for tile in board_starting_tiles:
-        grid.place_tile(game_state, tile.x, tile.y)
+        grid.place_tile(game_state, tile)
 
     tiles_by_player_id = { 
         player_id: tiles.draw_tiles(initial_tiles, tile_hand_size) 

@@ -177,13 +177,13 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
           .catch(e => displayError(e.response.data.error));
         });
       } else if (gameState.current_action_type == 'BUY') {
-        const festivalCount = document.querySelector('#festivalCount').value;
-        const worldwideCount = document.querySelector('#worldwideCount').value; 
-        const americanCount = document.querySelector('#americanCount').value; 
-        const luxorCount = document.querySelector('#luxorCount').value; 
-        const imperialCount = document.querySelector('#imperialCount').value; 
-        const towerCount = document.querySelector('#towerCount').value; 
-        const continentalCount = document.querySelector('#continentalCount').value; 
+        const festivalInput = document.querySelector('#festivalCount');
+        const worldwideInput = document.querySelector('#worldwideCount'); 
+        const americanInput = document.querySelector('#americanCount'); 
+        const luxorInput = document.querySelector('#luxorCount'); 
+        const imperialInput = document.querySelector('#imperialCount'); 
+        const towerInput = document.querySelector('#towerCount'); 
+        const continentalInput = document.querySelector('#continentalCount'); 
         
         auth.currentUser.getIdToken().then(idToken => {
           axios.post(
@@ -192,13 +192,13 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
               id_token: idToken,
               game_id: gameState.id,
               purchase_order: {
-                F: festivalCount || 0,
-                W: worldwideCount || 0,
-                A: americanCount || 0,
-                L: luxorCount || 0,
-                I: imperialCount || 0,
-                T: towerCount || 0,
-                C: continentalCount || 0
+                F: festivalInput ? festivalInput.value || 0 : 0,
+                W: worldwideInput ? worldwideInput.value || 0 : 0,
+                A: americanInput ? americanInput.value || 0 : 0,
+                L: luxorInput ? luxorInput.value || 0 : 0,
+                I: imperialInput ? imperialInput.value || 0 : 0,
+                T: towerInput ? towerInput.value || 0 : 0,
+                C: continentalInput ? continentalInput.value || 0 : 0
               }
             }
           )
@@ -340,6 +340,7 @@ const setupGrid = (gameState, user, playerTiles) => {
         const logo = logoByBrand[brand];
         const brandName = brandNameByBrandLetter[brand];
         const inputId = brandName.toLowerCase() + 'Count';
+        const cost = gameState.cost_by_brand[brand];
         html += `
           <div class="col" style="right-margin:0; padding: 0 20;">
             <div class="row">
@@ -347,8 +348,8 @@ const setupGrid = (gameState, user, playerTiles) => {
                 <img src="${logo}"></img>
               </div>
               <div class="col input-field inline" style="margin:0;">
-                <input type="number" id="${inputId}" min="0" max="3" class="validate">
-                <label for="${inputId}">${brandName}</label>
+                <input style="width:120;" type="number" id="${inputId}" min="0" max="3" class="validate">
+                <label for="${inputId}">${brandName} @ $${cost}</label>
               </div>
             </div>
           </div>
@@ -401,7 +402,8 @@ const setupGrid = (gameState, user, playerTiles) => {
       html += '<td height="50px" width="50px" style="text-align:center;border:thin solid black;padding:5;" ';
       playerHasTile = playerTiles.some(tile => tile['x'] == x && tile['y'] == y);
       if (space) {
-        const isMostRecent = x === gameState.most_recently_placed_tile.x && y === gameState.most_recently_placed_tile.y
+        const latestTile = gameState.most_recently_placed_tile;
+        const isMostRecent = !latestTile || (x === latestTile.x && y === latestTile.y);
         const size = space.is_locked ? 32 : 20;
         const rectFill = `fill:${colorByBrand[space.brand]};`;
         const rectStyle = isMostRecent ? rectFill + 'stroke:orange;stroke-width:5;' : rectFill;

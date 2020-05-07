@@ -92,7 +92,7 @@ def apply_majority_bonuses(state, chains):
 
 
 def handle_game_end(state):
-    branded_chains = grid.get_branded_chains(state.grid)
+    branded_chains = grid.get_branded_chains(state)
     players = state.player_order
 
     apply_majority_bonuses(state, branded_chains)
@@ -116,9 +116,19 @@ def calculate_price_from_chain(chain):
     return _calculate_price_from_value_tier(value_tier)
 
 
+def set_price_table(state):    
+    price_table = {
+        brand: _calculate_price_from_state_and_brand(state, brand) 
+        for brand 
+        in state.active_brands
+    }
+
+    state.cost_by_brand = price_table
+
+    return state
+
+
 def _perform_money_change(state, player_id, amount):
-    player_name = state.user_data_by_id[player_id]['display_name']
-    print(f'{player_name}: ${amount}')
     state.money_by_player[player_id] += amount
 
 
