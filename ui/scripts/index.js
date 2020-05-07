@@ -122,7 +122,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
 
   html += setupGameInfo(gameState);
 
-  html += '<div class="row" style="margin-bottom: 0;">'
+  html += '<div class="row" style="margin-bottom: 4;">'
     for (const player_id of gameState.player_order) {
       html += setupPlayerInfo(gameState, player_id);
     }
@@ -322,7 +322,7 @@ const setupGrid = (gameState, user, playerTiles) => {
           <option value="" selected></option>
         `;
 
-      for (const brand of brands) {
+      for (const brand of gameState.inactive_brands) {
         logo = logoByBrand[brand];
         brandName = brandNameByBrandLetter[brand];
         html += `<option value="${brand}" data-icon="${logo}">${brandName}</option>`;
@@ -336,7 +336,7 @@ const setupGrid = (gameState, user, playerTiles) => {
     } else if (gameState.current_action_type == 'BUY') {
       html += '<div class="row" style="margin-bottom: 0;">'
       
-      for (const brand of brands) {
+      for (const brand of gameState.active_brands) {
         const logo = logoByBrand[brand];
         const brandName = brandNameByBrandLetter[brand];
         const inputId = brandName.toLowerCase() + 'Count';
