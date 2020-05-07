@@ -48,12 +48,7 @@ const setupGameInfo = (gameState) => {
         </div>
         <div style="margin-bottom:0px;" class="row">`;
 
-  for (const brand in colorByBrand) {
-    // EEK!!!
-    if (brand === 'null') {
-      continue;
-    }
-
+  for (const brand of brands) {
     html += `
     <div style="margin:2;" class="col">
     <div class="row" style="margin-bottom:2;">
@@ -88,12 +83,7 @@ const setupPlayerInfo = (gameState, playerId) => {
         <div style="margin-bottom:0px;" class="row">
       `;
 
-  for (const brand in colorByBrand) {
-    // EEK!!!
-    if (brand === 'null') {
-      continue;
-    }
-
+  for (const brand of brands) {
     html += `
       <div style="margin:0 2;" class="col">
         <div class="row" style="margin-bottom:2;">
@@ -330,17 +320,17 @@ const setupGrid = (gameState, user, playerTiles) => {
       <div class="input-field col s12 m6">
         <select id="brand-selector" class="icons">
           <option value="" selected></option>
-          <option value="F" data-icon="img/festival.png">Festival</option>
-          <option value="W" data-icon="img/worldwide.png">Worldwide</option>
-          <option value="A" data-icon="img/american.png">American</option>
-          <option value="L" data-icon="img/luxor.png">Luxor</option>
-          <option value="I" data-icon="img/imperial.png">Imperial</option>
-          <option value="T" data-icon="img/tower.png">Tower</option>
-          <option value="C" data-icon="img/continental.png">Continental</option>
-        </select>
-        <label>Brand</label>
-      </div>
-      `;
+        `;
+
+      for (const brand of brands) {
+        logo = logoByBrand[brand];
+        brandName = brandNameByBrandLetter[brand];
+        html += `<option value="${brand}" data-icon="${logo}">${brandName}</option>`;
+      }
+   
+      html += `</select>
+      <label>Brand</label>
+    </div>`;
 
       html += '<a id="submit" class="waves-effect waves-light btn">submit</a><br><br>';
     } else if (gameState.current_action_type == 'BUY') {
