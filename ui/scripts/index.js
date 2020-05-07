@@ -38,7 +38,7 @@ const initGameboard = (game, user) => {
 
 const setupGameInfo = (gameState) => {
   var html = `
-  <div class="row">
+  <div class="row" style="margin-bottom: 0;">
   <div class="col s11">
     <div class="card blue-grey">
       <div style="padding:6px 15px;" class="card-content white-text">
@@ -55,14 +55,18 @@ const setupGameInfo = (gameState) => {
     }
 
     html += `
-      <div style="padding:5px;" class="col">
+    <div style="margin:2;" class="col">
+    <div class="row" style="margin-bottom:2;">
+      <div style="padding:0 0 0 5;" class="col">  
         <svg width="20" height="20">
           <rect width="20" height="20" style="fill:${colorByBrand[brand]}"/>
         </svg>
       </div>
-      <div style="padding:5px;" class="col">
+      <div style="padding:0 5;" class="col">
         <p>${gameState.stock_availability[brand]}</p>
-      </div>`;
+      </div>
+    </div>
+  </div>`;
   }
 
   html += '</div></div></div></div><div class="col s1"><a id="showHelpCard" class="btn-floating btn-large waves-effect waves-light green modal-trigger" data-target="modal-help" style="margin:34 0;">?</a></div></div>';
@@ -78,7 +82,7 @@ const setupPlayerInfo = (gameState, playerId) => {
     <div class="card ${cardColor}">
       <div style="padding:6px 15px;" class="card-content white-text">
         <span class="card-title">${gameState.user_data_by_id[playerId]['display_name']}</span>
-        <div style="margin-bottom:2px;" class="row">
+        <div style="margin-bottom:4px;" class="row">
           <p style="margin-left:5px;">$${gameState.money_by_player[playerId]}</p>
         </div>
         <div style="margin-bottom:0px;" class="row">
@@ -128,7 +132,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
 
   html += setupGameInfo(gameState);
 
-  html += '<div class="row">'
+  html += '<div class="row" style="margin-bottom: 0;">'
     for (const player_id of gameState.player_order) {
       html += setupPlayerInfo(gameState, player_id);
     }
@@ -340,7 +344,7 @@ const setupGrid = (gameState, user, playerTiles) => {
 
       html += '<a id="submit" class="waves-effect waves-light btn">submit</a><br><br>';
     } else if (gameState.current_action_type == 'BUY') {
-      html += '<div class="row">'
+      html += '<div class="row" style="margin-bottom: 0;">'
       
       for (const brand of brands) {
         const logo = logoByBrand[brand];
