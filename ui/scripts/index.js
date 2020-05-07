@@ -38,7 +38,8 @@ const initGameboard = (game, user) => {
 
 const setupGameInfo = (gameState) => {
   var html = `
-  <div class="col s12 m12">
+  <div class="row">
+  <div class="col s11">
     <div class="card blue-grey">
       <div style="padding:6px 15px;" class="card-content white-text">
         <span class="card-title">${gameState.title}</span>
@@ -64,7 +65,7 @@ const setupGameInfo = (gameState) => {
       </div>`;
   }
 
-  html += '</div></div></div></div>';
+  html += '</div></div></div></div><div class="col s1"><a id="showHelpCard" class="btn-floating btn-large waves-effect waves-light green modal-trigger" data-target="modal-help" style="margin:34 0;">?</a></div></div>';
 
   return html;
 };
@@ -114,12 +115,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
   const gameState = gameStateDoc.data();
   gameState.id = gameStateDoc.id;
 
-  var html = `<div class="row" style="margin:0;">
-  <div id="errorDiv" class="col s11" style="padding:0;"></div>
-  <div class="col s1" style="padding:0 10.5;">
-    <a id="showHelpCard" class="waves-effect waves-light btn modal-trigger" data-target="modal-help">?</a>
-  </div>
-</div>`;
+  var html = '<div id="errorDiv" class="col s12" style="padding:0;"></div>';
 
   if (!gameState.is_started) {
     html += '<a id="join-game" class="waves-effect waves-light btn">join game</a><br><br>';
