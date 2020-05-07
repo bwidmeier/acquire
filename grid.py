@@ -4,7 +4,8 @@ import models
 
 
 def place_tile(state, x, y, brand=None):
-    result = _place_tile_without_brand_registration(state, x, y, brand)
+    tile = models.Tile(x, y)
+    result = _place_tile_without_brand_registration(state, tile, brand)
     
     for chain in result.acquired_chains:
         _unregister_brand(state, chain.brand)
@@ -15,8 +16,8 @@ def place_tile(state, x, y, brand=None):
     return result
 
 
-def get_unique_neighbors(grid, x, y):
-    return list({chain for chain in _get_nonunique_neighbors_with_nulls(grid, x, y) if chain})
+def get_unique_neighbors(grid, tile):
+    return list({chain for chain in _get_nonunique_neighbors_with_nulls(grid, tile) if chain})
 
 
 def get_branded_chains(grid):
@@ -39,17 +40,17 @@ def find_chain(grid, brand):
     return None
 
 
-def _place_tile_without_brand_registration(state, x, y, brand=None):
-    if not 0 <= x < int(os.environ['WIDTH']):
+def _place_tile_without_brand_registration(state, tile, brand=None): 
+    if not 0 <= tile.x < int(os.environ['WIDTH']):
         raise models.RuleViolation('x coordinate is off the board!')
     
-    if not 0 <= y < int(os.environ['HEIGHT']):
+    if not 0 <= tile.y < int(os.environ['HEIGHT']):
         raise models.RuleViolation('y coordinate is off the board!')
 
-    if state.grid[x][y] is not None:
+    if state.grid[tile.x][tile.y] is not None:
         raise models.RuleViolation('Space already has tile on it!')
 
-    neighbors = get_unique_neighbors(state.grid, x, y)
+    neighbors = get_unique_neighbors(state.grid, tile)
     locked_neighbors = [neighbor for neighbor in neighbors if neighbor.is_locked()]
 
     if len(locked_neighbors) > 1:
@@ -59,26 +60,25 @@ def _place_tile_without_brand_registration(state, x, y, brand=None):
         if brand:
             raise models.RuleViolation('Cannot specify brand for single tile!')
 
-        _create_chain(state, x, y)
-        return models.PlaceTileResult(state, [], None, None)
+        _create_chain(state, tile)
+        return models.PlaceTileResult(state, [], None, None, tile)
 
     if len(neighbors) == 1:
-        _grow_chain(state, neighbors[0], brand, x, y)
-        return models.PlaceTileResult(state, [], None, brand)
+        _grow_chain(state, neighbors[0], brand, tile)
+        return models.PlaceTileResult(state, [], None, brand, tile)
 
-    acquired_chains, acquiree, new_brand = _merge_chains(state, neighbors, brand, x, y)
+    acquired_chains, acquiree, new_brand = _merge_chains(state, neighbors, brand, tile)
 
-    return models.PlaceTileResult(state, acquired_chains, acquiree, new_brand)
+    return models.PlaceTileResult(state, acquired_chains, acquiree, new_brand, tile)
 
 
-def _create_chain(state, x, y):
-    tile = models.Tile(x, y)
+def _create_chain(state, tile):
     chain = models.Chain([tile])
-    state.grid[x][y] = chain
+    state.grid[tile.x][tile.y] = chain
     return state
 
 
-def _grow_chain(state, chain, brand, x, y):
+def _grow_chain(state, chain, brand, tile):
     if brand in state.active_brands:
         raise models.RuleViolation('Cannot use brand already in use!')
     
@@ -88,15 +88,13 @@ def _grow_chain(state, chain, brand, x, y):
     if brand:
         chain.brand = brand
 
-    tile = models.Tile(x, y)
     chain.tiles.append(tile)
     
-    state.grid[x][y] = chain
+    state.grid[tile.x][tile.y] = chain
     return state
 
 
-def _merge_chains(state, current_chains, brand, x, y):
-    tile = models.Tile(x, y)
+def _merge_chains(state, current_chains, brand, tile):
     new_chain = models.Chain([tile])
     chains = current_chains + [new_chain]
 
@@ -169,7 +167,10 @@ def _partition(source, pred):
     return positive, negative
 
 
-def _get_nonunique_neighbors_with_nulls(grid, x, y):
+def _get_nonunique_neighbors_with_nulls(grid, tile):
+    x = tile.x
+    y = tile.y
+    
     if x > 0:
         yield grid[x - 1][y]
     if x < int(os.environ['WIDTH']) - 1:

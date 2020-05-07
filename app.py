@@ -51,7 +51,7 @@ def place_tile():
         raise models.RuleViolation('It is your turn, but it is not time to place a tile!')
 
     if should_skip:
-        turns.transition_from_place(state, None, [])
+        turns.transition_from_place(state, None)
         persistance.update_game_state(game_id, state.to_dict())
         return 'OK'
 
@@ -72,7 +72,7 @@ def place_tile():
     place_tile_result = grid.place_tile(state, x, y, brand)
     stock.apply_majority_bonuses(state, place_tile_result.acquired_chains)
     stock.award_founder_share(state, player_id, brand)
-    turns.transition_from_place(state, place_tile_result.acquirer, place_tile_result.acquired_chains)
+    turns.transition_from_place(state, place_tile_result)
 
     new_tile = tiles.draw_tile(global_tiles)
     state.tiles_remaining = len(global_tiles)

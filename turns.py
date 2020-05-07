@@ -7,7 +7,13 @@ import stock
 import grid
 
 
-def transition_from_place(game_state, acquirer, acquired_chains):
+def transition_from_place(game_state, place_tile_result):
+    if not place_tile_result:
+        return transition_from_resolve(game_state)
+
+    acquirer = place_tile_result.acquirer
+    acquired_chains = place_tile_result.acquired_chains
+
     if acquired_chains and not acquirer:
         raise Exception('If there are acquired chains, the acquirer must be specified!')
 
@@ -27,6 +33,7 @@ def transition_from_place(game_state, acquirer, acquired_chains):
                 })
     
     game_state.acquisition_resolution_queue = resolution_queue[::-1]
+    game_state.most_recently_placed_tile = place_tile_result.tile
     
     return transition_from_resolve(game_state)
 

@@ -46,7 +46,8 @@ class Chain:
     def to_dict(self):
         return {
             'brand': self.brand.value if self.brand else None,
-            'is_locked': self.is_locked()
+            'is_locked': self.is_locked(),
+            'count': len(self.tiles)
         }
 
 
@@ -67,6 +68,7 @@ class GameState:
         self.tiles_remaining = 0
         self.active_brands = []
         self.inactive_brands = [brand for brand in Brand]
+        self.most_recently_placed_tile = None
         self.acquisition_resolution_queue = []
 
 
@@ -87,6 +89,7 @@ class GameState:
             'tiles_remaining': self.tiles_remaining,
             'active_brands': [brand.value for brand in self.active_brands],
             'inactive_brands': [brand.value for brand in self.inactive_brands],
+            'most_recently_placed_tile': None if not self.most_recently_placed_tile else self.most_recently_placed_tile.to_dict(),
             'acquisition_resolution_queue': [
                 {
                     'player_id': details['player_id'], 
@@ -118,6 +121,7 @@ class GameState:
         new_state.tiles_remaining = state_data['tiles_remaining']
         new_state.active_brands = [Brand(brand_value) for brand_value in state_data['active_brands']]
         new_state.inactive_brands = [Brand(brand_value) for brand_value in state_data['inactive_brands']]
+        new_state.most_recently_placed_tile = None if not state_data['most_recently_placed_tile'] else Tile(**state_data['most_recently_placed_tile'])
         new_state.acquisition_resolution_queue = [
             {
                 'player_id': details['player_id'], 
@@ -152,9 +156,8 @@ class GameState:
                     board[x][y] = chain
                     continue
 
-                neighbors = grid.get_unique_neighbors(board, x, y)
-
                 tile = Tile(x, y)
+                neighbors = grid.get_unique_neighbors(board, tile)
 
                 if not neighbors:
                     board[x][y] = Chain([tile])
@@ -184,11 +187,12 @@ class GameState:
 
 
 class PlaceTileResult():
-    def __init__(self, state, acquired_chains, acquirer, new_brand):
+    def __init__(self, state, acquired_chains, acquirer, new_brand, tile):
         self.state = state
         self.acquired_chains = acquired_chains
         self.acquirer = acquirer
         self.new_brand = new_brand
+        self.tile = tile
 
 
 class RuleViolation(Exception):
