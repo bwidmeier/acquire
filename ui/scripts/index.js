@@ -78,8 +78,8 @@ const setupPlayerInfo = (gameState, playerId) => {
     <div class="card ${cardColor}">
       <div style="padding:6px 15px;" class="card-content white-text">
         <span class="card-title">${gameState.user_data_by_id[playerId]['display_name']}</span>
-        <div style="margin-bottom:0px;" class="row">
-        <p style="margin-left:5px;">$${gameState.money_by_player[playerId]}</p>
+        <div style="margin-bottom:2px;" class="row">
+          <p style="margin-left:5px;">$${gameState.money_by_player[playerId]}</p>
         </div>
         <div style="margin-bottom:0px;" class="row">
       `;
@@ -91,14 +91,18 @@ const setupPlayerInfo = (gameState, playerId) => {
     }
 
     html += `
-      <div style="padding:5px;" class="col">
-        <svg width="20" height="20">
-          <rect width="20" height="20" style="fill:${colorByBrand[brand]}"/>
-        </svg>
-      </div>
-      <div style="padding:5px;" class="col">
-        <p>${gameState.stock_by_player[playerId][brand]}</p>
-      </div>`
+      <div style="margin:0 2;" class="col">
+        <div class="row" style="margin-bottom:2;">
+          <div style="padding:0 0 0 5;" class="col">  
+            <svg width="20" height="20">
+              <rect width="20" height="20" style="fill:${colorByBrand[brand]}"/>
+            </svg>
+          </div>
+          <div style="padding:0 5;" class="col">
+            <p>${gameState.stock_by_player[playerId][brand]}</p>
+          </div>
+        </div>
+      </div>`;
   }
 
   html += ` 
@@ -136,6 +140,9 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
 
   var elems = document.querySelectorAll('select');
   M.FormSelect.init(elems);
+
+  var elems = document.querySelectorAll('.tooltipped');
+  M.Tooltip.init(elems, {html: true});
 
   if (user.uid == gameState.current_action_player && gameState.current_action_type != 'GAME_OVER') {
     document.querySelector('#submit').addEventListener('click', e => {
@@ -267,6 +274,16 @@ const clearError = () => {
   errorDiv.innerHTML = '';
 };
 
+const brands = [
+  'T',
+  'L',
+  'W',
+  'A',
+  'F',
+  'I',
+  'C'
+];
+
 // map brand to color
 const colorByBrand = {
   null: "#c3c3c3",
@@ -323,60 +340,28 @@ const setupGrid = (gameState, user, playerTiles) => {
 
       html += '<a id="submit" class="waves-effect waves-light btn">submit</a><br><br>';
     } else if (gameState.current_action_type == 'BUY') {
-      html += `
-      <table><tr>
-        <!-- Festival -->
-        <td><img src='img/festival.png'></img></td>
-        <td><div class="input-field inline">
-            <input type="number" id="festivalCount" min="0" max="3" class="validate">
-            <label for="festivalCount">Festival</label>
-        </div></td>
+      html += '<div class="row">'
+      
+      for (const brand of brands) {
+        const logo = logoByBrand[brand];
+        const brandName = brandNameByBrandLetter[brand];
+        const inputId = brandName.toLowerCase() + 'Count';
+        html += `
+          <div class="col" style="right-margin:0; padding: 0 20;">
+            <div class="row">
+              <div class="col" style="padding:12 0;">
+                <img src="${logo}"></img>
+              </div>
+              <div class="col input-field inline" style="margin:0;">
+                <input type="number" id="${inputId}" min="0" max="3" class="validate">
+                <label for="${inputId}">${brandName}</label>
+              </div>
+            </div>
+          </div>
+        `;
+      }
 
-        <!-- Worldwide -->
-        <td><img src='img/worldwide.png'></img></td>
-        <td><div class="input-field inline">
-            <input type="number" id="worldwideCount" min="0" max="3" class="validate">
-            <label for="worldwideCount">Worldwide</label>
-        </div></td>
-
-        <!-- American -->
-        <td><img src='img/american.png'></img></td>
-        <td><div class="input-field inline">
-            <input type="number" id="americanCount" min="0" max="3" class="validate">
-            <label for="americanCount">American</label>
-        </div></td>
-
-        <!-- Luxor -->
-        <td><img src='img/luxor.png'></img></td>
-        <td><div class="input-field inline">
-            <input type="number" id="luxorCount" min="0" max="3" class="validate">
-            <label for="luxorCount">Luxor</label>
-        </div></td>
-
-        <!-- Imperial -->
-        <td><img src='img/imperial.png'></img></td>
-        <td><div class="input-field inline">
-            <input type="number" id="imperialCount" min="0" max="3" class="validate">
-            <label for="imperialCount">Imperial</label>
-        </div></td>
-
-        <!-- Tower -->
-        <td><img src='img/tower.png'></img></td>
-        <td><div class="input-field inline">
-            <input type="number" id="towerCount" min="0" max="3" class="validate">
-            <label for="towerCount">Tower</label>
-        </div></td>
-
-        <!-- Continental -->
-        <td><img src='img/continental.png'></img></td>
-        <td><div class="input-field inline">
-            <input type="number" id="continentalCount" min="0" max="3" class="validate">
-            <label for="continentalCount">Continental</label>
-        </div></td>
-      </tr></table>
-      `;
-
-      html += '<a id="submit" class="waves-effect waves-light btn">submit</a><br><br>';
+      html += '</div><a id="submit" class="waves-effect waves-light btn">submit</a><br><br>';
     } else if (gameState.current_action_type == 'RESOLVE') {
       const acquiree = gameState.current_action_details.acquiree
       const cost = gameState.current_action_details.acquiree_cost_at_acquisition_time
@@ -419,14 +404,20 @@ const setupGrid = (gameState, user, playerTiles) => {
     html += '<tr>';
     for (x = 0; x < width; x++) {
       space = gameState.grid[x][y];
-      html += '<td height="50px" width="50px" style="text-align:center;border:thin solid black;">';
+      html += '<td height="50px" width="50px" style="text-align:center;border:thin solid black;padding:5;" ';
       playerHasTile = playerTiles.some(tile => tile['x'] == x && tile['y'] == y);
       if (space) {
-        html += `<svg width="20" height="20">
-                    <rect width="20" height="20" style="fill:${colorByBrand[space.brand]}"/>
+        const isMostRecent = x === gameState.most_recently_placed_tile.x && y === gameState.most_recently_placed_tile.y
+        const size = space.is_locked ? 32 : 20;
+        const rectFill = `fill:${colorByBrand[space.brand]};`;
+        const rectStyle = isMostRecent ? rectFill + 'stroke:orange;stroke-width:5;' : rectFill;
+        const tooltipBrandLine = space.brand ? `<b>Brand: ${brandNameByBrandLetter[space.brand]}</b><br>` : '';
+        const tooltip = `${tooltipBrandLine}Chain size: ${space.count}<br>Is safe: ${space.is_locked}`;
+        html += `class="tooltipped" data-position="top" data-tooltip="${tooltip}"><svg width="${size}" height="${size}">
+                    <rect width="${size}" height="${size}" style="${rectStyle}"/>
                   </svg>`;
       } else if (playerHasTile) {
-        html += `<label><input type="radio" id="grid_space" name="grid_space" data-x="${x}" data-y="${y}"></input><span style="padding:0px 25px 0px 0px;"></span></label>`;
+        html += `><label><input type="radio" id="grid_space" name="grid_space" data-x="${x}" data-y="${y}"></input><span style="padding:0px 25px 0px 0px;"></span></label>`;
       }
       html += '</td>';
     }
@@ -471,10 +462,12 @@ const setupGameList = (user, docs) => {
 
 // setup materialize components
 document.addEventListener('DOMContentLoaded', function() {
-
   var modals = document.querySelectorAll('.modal');
   M.Modal.init(modals);
 
   var items = document.querySelectorAll('.collapsible');
   M.Collapsible.init(items);
+
+  var elems = document.querySelectorAll('.tooltipped');
+  M.Tooltip.init(elems, {html: true});
 });
