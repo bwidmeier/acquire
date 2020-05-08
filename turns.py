@@ -40,6 +40,9 @@ def transition_from_place(game_state, place_tile_result):
 
 def transition_from_resolve(game_state):
     if not game_state.acquisition_resolution_queue:
+        if not game_state.active_brands:
+            return transition_from_buy(game_state)
+            
         game_state.current_action_player = game_state.current_turn_player
         game_state.current_action_type = models.ActionType.BUY_STOCK
         game_state.current_action_details = None
