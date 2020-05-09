@@ -32,12 +32,9 @@ def test_already_taken_spot(state):
 
 def test_grow_chain_no_brand(state):
     grid.place_tile(state, models.Tile(4, 6))
-    grid.place_tile(state, models.Tile(4, 7))
-
-    assert state.grid[4][6] is not None
-    assert state.grid[4][6].brand is None
-
-    assert state.grid[4][7] == state.grid[4][6]
+    
+    with pytest.raises(models.RuleViolation):
+        grid.place_tile(state, models.Tile(4, 7))
 
 
 def test_grow_chain_choose_brand(state):
@@ -171,8 +168,8 @@ def test_merge_multiple_branded_same_size(state):
 
 def test_merge_multiple_branded_different_size(state):
     grid.place_tile(state, models.Tile(8, 5))
-    grid.place_tile(state, models.Tile(8, 6))
-    grid.place_tile(state, models.Tile(8, 7), brand=models.Brand.TOWER)
+    grid.place_tile(state, models.Tile(8, 6), brand=models.Brand.TOWER)
+    grid.place_tile(state, models.Tile(8, 7))
     grid.place_tile(state, models.Tile(6, 4))
     grid.place_tile(state, models.Tile(6, 5), brand=models.Brand.AMERICAN)
 
@@ -198,57 +195,12 @@ def test_merge_multiple_branded_different_size(state):
     assert state.grid[8][5] == state.grid[6][5]
 
 
-def test_grow_unbranded_wouldbe_locked_chain_no_choice(state):
-    grid.place_tile(state, models.Tile(0, 0))
-    grid.place_tile(state, models.Tile(1, 0))
-    grid.place_tile(state, models.Tile(2, 0))
-    grid.place_tile(state, models.Tile(3, 0))
-    grid.place_tile(state, models.Tile(4, 0))
-    grid.place_tile(state, models.Tile(5, 0))
-    grid.place_tile(state, models.Tile(6, 0))
-    grid.place_tile(state, models.Tile(7, 0))
-    grid.place_tile(state, models.Tile(8, 0))
-    grid.place_tile(state, models.Tile(9, 0))
-    grid.place_tile(state, models.Tile(10, 0))
-
-    assert state.grid[9][0] == state.grid[1][0]
-    assert not state.grid[7][0].is_locked()
-
-    grid.place_tile(state, models.Tile(2, 1))
-
-    assert len(state.grid[2][1].tiles) == 12
-    assert not state.grid[2][1].is_locked()
-
-
-def test_grow_unbranded_wouldbe_locked_chain_choose_brand(state):
-    grid.place_tile(state, models.Tile(0, 0))
-    grid.place_tile(state, models.Tile(1, 0))
-    grid.place_tile(state, models.Tile(2, 0))
-    grid.place_tile(state, models.Tile(3, 0))
-    grid.place_tile(state, models.Tile(4, 0))
-    grid.place_tile(state, models.Tile(5, 0))
-    grid.place_tile(state, models.Tile(6, 0))
-    grid.place_tile(state, models.Tile(7, 0))
-    grid.place_tile(state, models.Tile(8, 0))
-    grid.place_tile(state, models.Tile(9, 0))
-    grid.place_tile(state, models.Tile(10, 0))
-
-    assert state.grid[9][0] == state.grid[1][0]
-    assert not state.grid[7][0].is_locked()
-
-    grid.place_tile(state, models.Tile(2, 1), brand=models.Brand.WORLDWIDE)
-
-    assert len(state.grid[2][1].tiles) == 12
-    assert state.grid[2][1].is_locked()
-    assert state.grid[2][1].brand == models.Brand.WORLDWIDE
-
-
 def test_grow_locked_chain(state):
     grid.place_tile(state, models.Tile(0, 0))
-    grid.place_tile(state, models.Tile(1, 0))
+    grid.place_tile(state, models.Tile(1, 0), brand=models.Brand.FESTIVAL)
     grid.place_tile(state, models.Tile(2, 0))
     grid.place_tile(state, models.Tile(3, 0))
-    grid.place_tile(state, models.Tile(4, 0), brand=models.Brand.FESTIVAL)
+    grid.place_tile(state, models.Tile(4, 0))
     grid.place_tile(state, models.Tile(5, 0))
     grid.place_tile(state, models.Tile(6, 0))
     grid.place_tile(state, models.Tile(7, 0))
@@ -271,10 +223,10 @@ def test_grow_locked_chain(state):
 
 def test_merge_locked_chains(state):
     grid.place_tile(state, models.Tile(0, 0))
-    grid.place_tile(state, models.Tile(1, 0))
+    grid.place_tile(state, models.Tile(1, 0), brand=models.Brand.FESTIVAL)
     grid.place_tile(state, models.Tile(2, 0))
     grid.place_tile(state, models.Tile(3, 0))
-    grid.place_tile(state, models.Tile(4, 0), brand=models.Brand.FESTIVAL)
+    grid.place_tile(state, models.Tile(4, 0))
     grid.place_tile(state, models.Tile(5, 0))
     grid.place_tile(state, models.Tile(6, 0))
     grid.place_tile(state, models.Tile(7, 0))
@@ -283,10 +235,10 @@ def test_merge_locked_chains(state):
     grid.place_tile(state, models.Tile(10, 0))
 
     grid.place_tile(state, models.Tile(0, 2))
-    grid.place_tile(state, models.Tile(1, 2))
+    grid.place_tile(state, models.Tile(1, 2), brand=models.Brand.LUXOR)
     grid.place_tile(state, models.Tile(2, 2))
     grid.place_tile(state, models.Tile(3, 2))
-    grid.place_tile(state, models.Tile(4, 2), brand=models.Brand.LUXOR)
+    grid.place_tile(state, models.Tile(4, 2))
     grid.place_tile(state, models.Tile(5, 2))
     grid.place_tile(state, models.Tile(6, 2))
     grid.place_tile(state, models.Tile(7, 2))
@@ -303,10 +255,10 @@ def test_merge_locked_chains(state):
 
 def test_merge_locked_and_unlocked_chain(state):
     grid.place_tile(state, models.Tile(0, 0))
-    grid.place_tile(state, models.Tile(1, 0))
+    grid.place_tile(state, models.Tile(1, 0), brand=models.Brand.FESTIVAL)
     grid.place_tile(state, models.Tile(2, 0))
     grid.place_tile(state, models.Tile(3, 0))
-    grid.place_tile(state, models.Tile(4, 0), brand=models.Brand.FESTIVAL)
+    grid.place_tile(state, models.Tile(4, 0))
     grid.place_tile(state, models.Tile(5, 0))
     grid.place_tile(state, models.Tile(6, 0))
     grid.place_tile(state, models.Tile(7, 0))
@@ -315,10 +267,10 @@ def test_merge_locked_and_unlocked_chain(state):
     grid.place_tile(state, models.Tile(10, 0))
 
     grid.place_tile(state, models.Tile(0, 2))
-    grid.place_tile(state, models.Tile(1, 2))
+    grid.place_tile(state, models.Tile(1, 2), brand=models.Brand.LUXOR)
     grid.place_tile(state, models.Tile(2, 2))
     grid.place_tile(state, models.Tile(3, 2))
-    grid.place_tile(state, models.Tile(4, 2), brand=models.Brand.LUXOR)
+    grid.place_tile(state, models.Tile(4, 2))
     grid.place_tile(state, models.Tile(5, 2))
     grid.place_tile(state, models.Tile(6, 2))
     grid.place_tile(state, models.Tile(7, 2))
@@ -336,10 +288,10 @@ def test_merge_locked_and_unlocked_chain(state):
 
 def test_merge_locked_chains_and_unlocked_chain(state):
     grid.place_tile(state, models.Tile(0, 1))
-    grid.place_tile(state, models.Tile(1, 1))
+    grid.place_tile(state, models.Tile(1, 1), brand=models.Brand.FESTIVAL)
     grid.place_tile(state, models.Tile(2, 1))
     grid.place_tile(state, models.Tile(3, 1))
-    grid.place_tile(state, models.Tile(4, 1), brand=models.Brand.FESTIVAL)
+    grid.place_tile(state, models.Tile(4, 1))
     grid.place_tile(state, models.Tile(5, 1))
     grid.place_tile(state, models.Tile(6, 1))
     grid.place_tile(state, models.Tile(7, 1))
@@ -348,10 +300,10 @@ def test_merge_locked_chains_and_unlocked_chain(state):
     grid.place_tile(state, models.Tile(5, 0))
 
     grid.place_tile(state, models.Tile(0, 3))
-    grid.place_tile(state, models.Tile(1, 3))
+    grid.place_tile(state, models.Tile(1, 3), brand=models.Brand.LUXOR)
     grid.place_tile(state, models.Tile(2, 3))
     grid.place_tile(state, models.Tile(3, 3))
-    grid.place_tile(state, models.Tile(4, 3), brand=models.Brand.LUXOR)
+    grid.place_tile(state, models.Tile(4, 3))
     grid.place_tile(state, models.Tile(5, 3))
     grid.place_tile(state, models.Tile(6, 3))
     grid.place_tile(state, models.Tile(7, 3))

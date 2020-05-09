@@ -92,6 +92,9 @@ def _grow_chain(state, chain, brand, tile):
     if brand is not None and chain.brand is not None:
         raise models.RuleViolation('Cannot rebrand chain!')
 
+    if brand is None and chain.brand is None:
+        raise models.RuleViolation('Cannot grow chain without branding it!')
+
     if brand:
         chain.brand = brand
 
