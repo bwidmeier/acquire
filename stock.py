@@ -3,6 +3,7 @@ import collections
 
 import grid
 import models
+import action_display
 
 
 def buy_stock(state, player_id, brand, amount):
@@ -28,6 +29,8 @@ def buy_stock(state, player_id, brand, amount):
     _perform_money_change(state, player_id, -total_price)
     state.stock_by_player[player_id][brand] += amount
 
+    action_display.record_buy_action(state, brand, amount, price_per_stock)
+
     return state
 
 
@@ -45,6 +48,8 @@ def sell_stock(state, player_id, brand, cost_per_stock, sell_count):
     state.stock_by_player[player_id][brand] -= sell_count
     state.stock_availability[brand] += sell_count
     _perform_money_change(state, player_id, total_price)
+
+    action_display.record_sell_action(state, brand, sell_count, cost_per_stock)
 
     return state
 
@@ -67,6 +72,9 @@ def trade_stock(state, player_id, brand_to_send, brand_to_receive, send_count):
     state.stock_availability[brand_to_send] += send_count
     state.stock_availability[brand_to_receive] -= receive_count
 
+    action_display.record_trade_action(
+        state, brand_to_send, send_count, brand_to_receive, receive_count)
+
     return state
 
 
@@ -81,6 +89,9 @@ def award_founder_share(state, player_id, brand):
 
     state.stock_availability[brand] -= 1
     state.stock_by_player[player_id][brand] += 1
+
+    action_display.record_founders_share(state, brand)
+    
     return state
 
 
@@ -168,16 +179,19 @@ def _apply_chain_majority_bonuses(state, chain):
         bonus_per_player = math.ceil(raw_bonus_per_player / 100) * 100
         for player_id in top_tier_players:
             _perform_money_change(state, player_id, bonus_per_player)
+            action_display.record_majority_bonus(state, player_id, brand, bonus_per_player, 1)
 
         return state
 
     # there is a unique winner
     (top_tier_player,) = top_tier_players
     _perform_money_change(state, top_tier_player, first_bonus)
+    action_display.record_majority_bonus(state, top_tier_player, brand, first_bonus, 1)
 
     if tier_count == 1:
         # winner gets both bonuses if no one else has matching stock
         _perform_money_change(state, top_tier_player, second_bonus)
+        action_display.record_majority_bonus(state, top_tier_player, brand, second_bonus, 2)
         return state
 
     # there are some number of second place finishers (could be 1), split 2nd bonus among them
@@ -188,6 +202,7 @@ def _apply_chain_majority_bonuses(state, chain):
     bonus_per_player = math.ceil(raw_bonus_per_player / 100) * 100
     for player_id in second_tier_players:
         _perform_money_change(state, player_id, bonus_per_player)
+        action_display.record_majority_bonus(state, player_id, brand, bonus_per_player, 2)
 
     return state
     

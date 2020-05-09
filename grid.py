@@ -1,9 +1,19 @@
 import os
 
 import models
+import action_display
 
 
-def place_tile(state, tile, brand=None): 
+def place_tile(state, tile, brand=None):
+    place_tile_result = _place_tile(state, tile, brand)
+
+    if state.is_started:
+        action_display.record_place_action(state, place_tile_result)
+    
+    return place_tile_result
+
+
+def _place_tile(state, tile, brand): 
     if not 0 <= tile.x < int(os.environ['WIDTH']):
         raise models.RuleViolation('x coordinate is off the board!')
     

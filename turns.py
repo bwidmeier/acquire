@@ -8,9 +8,6 @@ import grid
 
 
 def transition_from_place(game_state, place_tile_result):
-    if not place_tile_result:
-        return transition_from_resolve(game_state)
-
     acquirer = place_tile_result.acquirer
     acquired_chains = place_tile_result.acquired_chains
 

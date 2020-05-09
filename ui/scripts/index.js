@@ -2,7 +2,7 @@
 const gameList = document.querySelector('.game-list');
 const gameBoard = document.querySelector('.game-board');
 const loggedOutLinks = document.querySelectorAll('.logged-out');
-const loggedInLinks = document.querySelectorAll('.logged-in');;
+const loggedInLinks = document.querySelectorAll('.logged-in');
 
 const setupUI = (user) => {
   if (user) {
@@ -57,7 +57,7 @@ const setupGameInfo = (gameState) => {
           <rect width="20" height="20" style="fill:${colorByBrand[brand]}"/>
         </svg>
       </div>
-      <div style="padding:0 5;" class="col">
+      <div style="padding:0 5;width:25;" class="col">
         <p>${gameState.stock_availability[brand]}</p>
       </div>
     </div>
@@ -92,7 +92,7 @@ const setupPlayerInfo = (gameState, playerId) => {
               <rect width="20" height="20" style="fill:${colorByBrand[brand]}"/>
             </svg>
           </div>
-          <div style="padding:0 5;" class="col">
+          <div style="padding:0 5;width:25;" class="col">
             <p>${gameState.stock_by_player[playerId][brand]}</p>
           </div>
         </div>
@@ -130,7 +130,21 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
 
   html += setupGrid(gameState, user, playerTiles);
 
+  html += `
+  <div>
+    <ul id="actions" class="collection" style="height:200;overflow:auto;">`;
+  
+  for (const action of gameState.most_recent_actions) {
+    html += `<li class="collection-item">${action}</li>`;
+  }
+
+  html += `</ul>
+  </div>`;
+
   gameBoard.innerHTML = html;
+
+  var objDiv = document.getElementById("actions");
+  objDiv.scrollTop = objDiv.scrollHeight;
 
   var elems = document.querySelectorAll('select');
   M.FormSelect.init(elems);
@@ -143,20 +157,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
       if (gameState.current_action_type == 'PLACE') { 
         const selectedSpace = document.querySelector('input[name="grid_space"]:checked');
         if (!selectedSpace) {
-          // stopgap until backend gives players new tiles if they can't play (or skips their placement phase if they still can't)
-          // return;
-          auth.currentUser.getIdToken().then(idToken => {
-            axios.post(
-              '/place_tile',
-              { 
-                id_token: idToken,
-                game_id: gameState.id,
-                skip: true
-              }
-            )
-            .then(r => clearError())
-            .catch(e => displayError(e.response.data.error));
-          });
+          return;
         }
         const x = selectedSpace.dataset['x'];
         const y = selectedSpace.dataset['y'];
@@ -169,8 +170,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
               game_id: gameState.id,
               x: x,
               y: y,
-              brand: brand,
-              skip: false
+              brand: brand
             }
           )
           .then(r => clearError())

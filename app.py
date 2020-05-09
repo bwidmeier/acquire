@@ -13,6 +13,7 @@ import grid
 import tiles
 import turns
 import stock
+import action_display
 
 
 firebase_admin.initialize_app()
@@ -39,8 +40,11 @@ def send_img(path):
 def place_tile():
     game_id = request.json['game_id']
     id_token = request.json['id_token']
-    should_skip = request.json['skip']
-    
+    x = int(request.json['x'])
+    y = int(request.json['y'])
+    raw_brand = request.json['brand']
+    brand = None if raw_brand == '' else models.Brand(raw_brand)
+
     player_id = firebase_admin.auth.verify_id_token(id_token)['uid']
     state = persistance.get_game_state(game_id)
     
@@ -49,16 +53,6 @@ def place_tile():
 
     if state.current_action_type != models.ActionType.PLACE_TILE:
         raise models.RuleViolation('It is your turn, but it is not time to place a tile!')
-
-    if should_skip:
-        turns.transition_from_place(state, None)
-        persistance.update_game_state(game_id, state.to_dict())
-        return 'OK'
-
-    x = int(request.json['x'])
-    y = int(request.json['y'])
-    raw_brand = request.json['brand']
-    brand = None if raw_brand == '' else models.Brand(raw_brand)
 
     global_tiles = persistance.get_global_tiles(game_id)
     player_tiles = persistance.get_player_tiles(game_id, player_id)
@@ -117,9 +111,10 @@ def resolve_acquisition():
 
     acquirer = models.Brand(state.current_action_details['acquirer'])
     cost_at_acquisition_time = state.current_action_details['acquiree_cost_at_acquisition_time']
-
+    
     stock.sell_stock(state, user_id, acquiree, cost_at_acquisition_time, sell_count)
     stock.trade_stock(state, user_id, acquiree, acquirer, trade_count)
+
     turns.transition_from_resolve(state)
 
     persistance.update_game_state(game_id, state.to_dict())
@@ -152,7 +147,8 @@ def buy_stock():
     for raw_brand, raw_amount in purchase_order.items():
         parsed_amount = int(raw_amount)
         total_stock_purchased += parsed_amount
-        stock.buy_stock(state, user_id, models.Brand(raw_brand), parsed_amount)
+        brand = models.Brand(raw_brand)
+        stock.buy_stock(state, user_id, brand, parsed_amount)
 
     if total_stock_purchased > max_purchase_amount:
         raise models.RuleViolation('Too many stock in purchase order!')
@@ -222,15 +218,15 @@ def start_game():
     shuffle(game_state.player_order)
     starting_player = game_state.player_order[0]
 
-    game_state.is_started = True
-    game_state.current_turn_player = starting_player
-    game_state.current_action_player = starting_player
-
     initial_tiles = tiles.generate_initial_tiles()
 
     board_starting_tiles = tiles.draw_tiles(initial_tiles, player_count)
     for tile in board_starting_tiles:
         grid.place_tile(game_state, tile)
+
+    game_state.is_started = True
+    game_state.current_turn_player = starting_player
+    game_state.current_action_player = starting_player
 
     tiles_by_player_id = { 
         player_id: tiles.draw_tiles(initial_tiles, tile_hand_size) 
@@ -255,7 +251,7 @@ def handle_rule_violation(e):
 
 @app.after_request
 def add_header(r):
-    if bool(int(os.environ['FORCE_REFRESH'])):
+    if bool(int(os.environ.get('FORCE_REFRESH', '0'))):
         r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         r.headers['Pragma'] = 'no-cache'
         r.headers['Expires'] = '0'

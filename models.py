@@ -75,6 +75,7 @@ class GameState:
         self.inactive_brands = [brand for brand in Brand]
         self.active_brands = []
         self.most_recently_placed_tile = None
+        self.most_recent_actions = []
         self.acquisition_resolution_queue = []
 
 
@@ -97,6 +98,7 @@ class GameState:
             'inactive_brands': [brand.value for brand in self.inactive_brands],
             'active_brands': [brand.value for brand in self.active_brands],
             'most_recently_placed_tile': None if not self.most_recently_placed_tile else self.most_recently_placed_tile.to_dict(),
+            'most_recent_actions': self.most_recent_actions,
             'acquisition_resolution_queue': [
                 {
                     'player_id': details['player_id'], 
@@ -130,6 +132,7 @@ class GameState:
         new_state.inactive_brands = [Brand(brand_value) for brand_value in state_data['inactive_brands']]
         new_state.active_brands = [Brand(brand_value) for brand_value in state_data['active_brands']]
         new_state.most_recently_placed_tile = None if not state_data['most_recently_placed_tile'] else Tile(**state_data['most_recently_placed_tile'])
+        new_state.most_recent_actions = state_data['most_recent_actions']
         new_state.acquisition_resolution_queue = [
             {
                 'player_id': details['player_id'], 
