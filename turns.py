@@ -5,9 +5,11 @@ import toolz
 import models
 import stock
 import grid
+import tiles
+import persistance
 
 
-def transition_from_place(game_state, place_tile_result):
+def transition_from_place(game_state, place_tile_result, game_id):
     acquirer = place_tile_result.acquirer
     acquired_chains = place_tile_result.acquired_chains
 
@@ -32,13 +34,13 @@ def transition_from_place(game_state, place_tile_result):
     game_state.acquisition_resolution_queue = resolution_queue[::-1]
     game_state.most_recently_placed_tile = place_tile_result.tile
     
-    return transition_from_resolve(game_state)
+    return transition_from_resolve(game_state, game_id)
 
 
-def transition_from_resolve(game_state):
+def transition_from_resolve(game_state, game_id):
     if not game_state.acquisition_resolution_queue:
         if not game_state.active_brands:
-            return transition_from_buy(game_state)
+            return transition_from_buy(game_state, game_id)
             
         game_state.current_action_player = game_state.current_turn_player
         game_state.current_action_type = models.ActionType.BUY_STOCK
@@ -58,7 +60,7 @@ def transition_from_resolve(game_state):
     return game_state
 
 
-def transition_from_buy(game_state):
+def transition_from_buy(game_state, game_id):
     if _is_game_over(game_state):
         stock.handle_game_end(game_state)
         game_state.current_action_type = models.ActionType.GAME_OVER
@@ -66,6 +68,13 @@ def transition_from_buy(game_state):
         game_state.current_turn_player = None
         game_state.current_action_details = list(toolz.map(toolz.first, sorted(game_state.money_by_player.items(), key=toolz.second, reverse=True)))
         return game_state
+
+    global_tiles = persistance.get_global_tiles(game_id)
+    new_tile = tiles.draw_tile(global_tiles)
+    game_state.tiles_remaining = len(global_tiles)
+    
+    if new_tile:
+        persistance.deal_tile_to_player(game_id, game_state.current_turn_player, new_tile)
 
     next_player = _get_next_player(game_state)
     game_state.current_turn_player = next_player

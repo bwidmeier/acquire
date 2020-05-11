@@ -54,7 +54,6 @@ def place_tile():
     if state.current_action_type != models.ActionType.PLACE_TILE:
         raise models.RuleViolation('It is your turn, but it is not time to place a tile!')
 
-    global_tiles = persistance.get_global_tiles(game_id)
     player_tiles = persistance.get_player_tiles(game_id, player_id)
 
     if not any(tile.x == x and tile.y == y for tile in player_tiles):
@@ -69,13 +68,7 @@ def place_tile():
     stock.award_founder_share(state, player_id, brand)
     grid.set_brand_lists(state)
     stock.set_price_table(state)
-    turns.transition_from_place(state, place_tile_result)
-
-    new_tile = tiles.draw_tile(global_tiles)
-    state.tiles_remaining = len(global_tiles)
-
-    if new_tile:
-        persistance.deal_tile_to_player(game_id, player_id, new_tile)
+    turns.transition_from_place(state, place_tile_result, game_id)
     
     persistance.delete_player_tile(game_id, player_id, models.Tile(x, y))
     # this should all happen atomically, but as a stopgap make sure this happens last
@@ -115,7 +108,7 @@ def resolve_acquisition():
     stock.sell_stock(state, user_id, acquiree, cost_at_acquisition_time, sell_count)
     stock.trade_stock(state, user_id, acquiree, acquirer, trade_count)
 
-    turns.transition_from_resolve(state)
+    turns.transition_from_resolve(state, game_id)
 
     persistance.update_game_state(game_id, state.to_dict())
 
@@ -153,7 +146,7 @@ def buy_stock():
     if total_stock_purchased > max_purchase_amount:
         raise models.RuleViolation('Too many stock in purchase order!')
 
-    turn_transitioned_state = turns.transition_from_buy(state)
+    turn_transitioned_state = turns.transition_from_buy(state, game_id)
 
     persistance.update_game_state(game_id, turn_transitioned_state.to_dict())
 

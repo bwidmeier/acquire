@@ -32,6 +32,10 @@ def record_buy_action(state, brand, amount, price_per_stock):
 
 def _generate_buy_action_text(state, brand, amount, price_per_stock):
     player_name = _get_current_action_player_name(state)
+
+    if amount == 3:
+        return f'{player_name} jammed {brand.name} @ ${price_per_stock} each.'
+
     return f'{player_name} bought {amount} {brand.name} stock @ ${price_per_stock} each.'
 
 
