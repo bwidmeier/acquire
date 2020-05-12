@@ -150,7 +150,7 @@ const setupGameboard = (gameStateDoc, user, playerTiles) => {
   M.FormSelect.init(elems);
 
   var elems = document.querySelectorAll('.tooltipped');
-  M.Tooltip.init(elems, {html: true});
+  M.Tooltip.init(elems, {html: true, outDuration: 0});
 
   if (user.uid == gameState.current_action_player && gameState.current_action_type != 'GAME_OVER') {
     document.querySelector('#submit').addEventListener('click', e => {
@@ -322,7 +322,7 @@ const setupGrid = (gameState, user, playerTiles) => {
           <option value="" selected></option>
         `;
 
-      for (const brand of gameState.inactive_brands) {
+      for (const brand of brands) {
         logo = logoByBrand[brand];
         brandName = brandNameByBrandLetter[brand];
         html += `<option value="${brand}" data-icon="${logo}">${brandName}</option>`;
@@ -465,5 +465,5 @@ document.addEventListener('DOMContentLoaded', function() {
   M.Collapsible.init(items);
 
   var elems = document.querySelectorAll('.tooltipped');
-  M.Tooltip.init(elems, {html: true});
+  M.Tooltip.init(elems, {html: true, outDuration: 0});
 });

@@ -38,6 +38,9 @@ def sell_stock(state, player_id, brand, cost_per_stock, sell_count):
     if sell_count < 0:
         raise models.RuleViolation('Cannot sell negative stock!')
 
+    if sell_count == 0:
+        return state
+
     player_stock_count = state.stock_by_player[player_id][brand]
 
     if player_stock_count < sell_count:
@@ -49,7 +52,7 @@ def sell_stock(state, player_id, brand, cost_per_stock, sell_count):
     state.stock_availability[brand] += sell_count
     _perform_money_change(state, player_id, total_price)
 
-    action_display.record_sell_action(state, brand, sell_count, cost_per_stock)
+    action_display.record_sell_action(state, player_id, brand, sell_count, cost_per_stock)
 
     return state
 
@@ -61,6 +64,9 @@ def trade_stock(state, player_id, brand_to_send, brand_to_receive, send_count):
     if send_count % 2 != 0:
         raise models.RuleViolation('Cannot trade an odd number of stock!')
     
+    if send_count == 0:
+        return state
+
     global_stock_to_receive_count = state.stock_availability[brand_to_receive]
     receive_count = send_count / 2
 

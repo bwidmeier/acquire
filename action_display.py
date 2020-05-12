@@ -17,7 +17,7 @@ def _generate_place_action_text(state, place_tile_result):
     if place_tile_result.new_brand:
         extra_info = f'They established a new chain under the {place_tile_result.new_brand.name} brand.'
 
-    if place_tile_result.acquirer:
+    if place_tile_result.acquired_chains:
         brands_string = ', '.join(chain.brand.name for chain in place_tile_result.acquired_chains)
         extra_info = f'This resulted in {place_tile_result.acquirer.name} acquiring the following brand(s): {brands_string}'
     
@@ -39,14 +39,14 @@ def _generate_buy_action_text(state, brand, amount, price_per_stock):
     return f'{player_name} bought {amount} {brand.name} stock @ ${price_per_stock} each.'
 
 
-def record_sell_action(state, brand, amount, price_per_stock):
-    action_text = _generate_sell_action_text(state, brand, amount, price_per_stock)
+def record_sell_action(state, player_id, brand, amount, price_per_stock):
+    action_text = _generate_sell_action_text(state, player_id, brand, amount, price_per_stock)
     _append_action_text(state, action_text)
     return state
 
 
-def _generate_sell_action_text(state, brand, amount, price_per_stock):
-    player_name = _get_current_action_player_name(state)
+def _generate_sell_action_text(state, player_id, brand, amount, price_per_stock):
+    player_name = state.user_data_by_id[player_id]['display_name']
     return f'{player_name} sold {amount} {brand.name} stock @ ${price_per_stock} each.'
 
 
@@ -60,7 +60,7 @@ def record_trade_action(state, source_brand, source_amount, target_brand, target
 
 def _generate_trade_action_text(state, source_brand, source_amount, target_brand, target_amount):
     player_name = _get_current_action_player_name(state)
-    return f'{player_name} traded {source_amount} {source_brand.name} for {target_amount} {target_brand.name}.'
+    return f'{player_name} traded {source_amount} {source_brand.name} for {int(target_amount)} {target_brand.name}.'
 
 
 def record_founders_share(state, brand):
