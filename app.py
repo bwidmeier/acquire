@@ -65,7 +65,7 @@ def place_tile():
     tile = models.Tile(x, y)
     place_tile_result = grid.place_tile(state, tile, brand)
     stock.apply_majority_bonuses(state, place_tile_result.acquired_chains)
-    stock.award_founder_share(state, player_id, brand)
+    stock.award_founder_share(state, player_id, place_tile_result.new_brand)
     grid.set_brand_lists(state)
     stock.set_price_table(state)
     turns.transition_from_place(state, place_tile_result, game_id)
